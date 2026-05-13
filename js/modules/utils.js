@@ -19,8 +19,8 @@ export function fmtCell(col, val) {
   }
   if (col.fmt === 'price') {
     const v = val;
-    let cls = v > 5000 ? 'cv-price-high' : v > 1500 ? 'cv-price-mid' : 'cv-price-low';
-    return `<span class="${cls}">$${v.toLocaleString('ru-RU')}</span>`;
+    let cls = v > 100000 ? 'cv-price-high' : v > 30000 ? 'cv-price-mid' : 'cv-price-low';
+    return `<span class="${cls}">₴${v.toLocaleString('ru-RU')}</span>`;
   }
   if (col.key === 'segment') {
     const m = {'Professional':'cv-segment-professional','Broadcast':'cv-segment-broadcast','XR / Virtual':'cv-segment-xr','Standard':'cv-segment-standard','Budget':'cv-segment-budget'};
