@@ -54,6 +54,9 @@
   <button class="tab-btn" data-tab="compare">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Сравнение
   </button>
+  <button class="tab-btn" data-tab="setup">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Настройка
+  </button>
 </nav>
 
 <main class="main" id="mainContent">
@@ -584,6 +587,113 @@
         <tr><td class="td-key">Виртуальная студия XR</td><td>P1.2–P2</td><td>SMD / COB</td><td>Megapixel / Brompton</td><td>Local</td><td>IP30</td></tr>
       </tbody>
     </table>
+  </div>
+</section>
+
+<!-- ===================== SETUP INSTRUCTIONS ===================== -->
+<section class="section" id="tab-setup">
+  <div class="page-title">Инструкция по настройке оборудования</div>
+
+  <div class="info-box info-blue">
+    <strong>Пример конфигурации:</strong> Плеер Colorlight A100 + Приёмные карты 5A-75B + Модули P5 (Outdoor).
+  </div>
+
+  <div class="section-title"><div class="ic"></div>Шаг 1: Физическое подключение (Wiring)</div>
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="card card-accent">
+      <h4>Схема подключения питания</h4>
+      <p>1. Подключите блоки питания (5V) к модулям P5 и приёмным картам 5A-75B.</p>
+      <p>2. Убедитесь, что сечение кабеля соответствует нагрузке (типично 2.5 мм² на 3–4 модуля).</p>
+      <div class="info-box info-red" style="margin-top:10px">Внимание: Не путайте полярность + и -. Ошибка приведёт к выходу оборудования из строя.</div>
+    </div>
+    <div class="card card-accent">
+      <h4>Схема передачи данных</h4>
+      <p>1. Плеер A100 (LAN порт) → Приёмная карта №1 (Ethernet In).</p>
+      <p>2. Карта №1 (Ethernet Out) → Карта №2 (Ethernet In) и т.д. по цепочке.</p>
+      <p>3. От приёмной карты 5A-75B → шлейфы HUB75 к модулям P5.</p>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="ic"></div>Шаг 2: Настройка плеера A100</div>
+  <div class="card" style="margin-bottom:20px">
+    <p>Для настройки плеера используется ПО <strong>Colorlight PlayerMaster</strong> или <strong>LEDAssistant</strong>.</p>
+    <div class="table-wrap" style="margin-top:12px">
+      <table>
+        <thead><tr><th>Действие</th><th>Описание</th></tr></thead>
+        <tbody>
+          <tr><td class="td-key">Подключение к ПК</td><td>Подключите ПК к плееру через Wi-Fi (пароль по умолчанию: 12345678) или LAN.</td></tr>
+          <tr><td class="td-key">Обнаружение устройства</td><td>Запустите PlayerMaster, перейдите в «Device Management», плеер должен появиться в списке.</td></tr>
+          <tr><td class="td-key">Сетевые настройки</td><td>Настройте статический IP или DHCP, если планируется управление через интернет (iCloud).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="ic"></div>Шаг 3: Конфигурация экрана (RCFGX)</div>
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="card">
+      <h4>Настройка параметров модуля (Receiving Card)</h4>
+      <p>В ПО LEDAssistant перейдите во вкладку <strong>«Screen Configuration»</strong> → <strong>«Receiving Card»</strong>.</p>
+      <ul style="margin-top:10px; color:var(--text2); font-size:13px; padding-left:20px">
+        <li>Выберите тип чипа (например, ICN2037 / ICN2038S для P5).</li>
+        <li>Установите разрешение модуля (обычно 64×32 для P5 320x160мм).</li>
+        <li>Настройте метод сканирования (Scan Mode), обычно 1/8 или 1/16.</li>
+        <li>Нажмите «Send to Receiving Card» и «Save to Receiver».</li>
+      </ul>
+      <div class="info-box info-orange" style="margin-top:10px">Если нет готового файла .rcfgx, используйте функцию <strong>Smart Setting</strong> для пошагового определения параметров.</div>
+    </div>
+    <div class="card">
+      <h4>Настройка карты отправки (Sending Card / A100)</h4>
+      <p>Вкладка <strong>«Sender»</strong>:</p>
+      <ul style="margin-top:10px; color:var(--text2); font-size:13px; padding-left:20px">
+        <li>Установите разрешение, соответствующее общему размеру экрана.</li>
+        <li>Проверьте частоту кадров (обычно 60Hz).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="ic"></div>Шаг 4: Построение карты экрана (Mapping)</div>
+  <div class="card" style="margin-bottom:20px">
+    <p>Вкладка <strong>«Screen Connection»</strong> (или «Mapping»):</p>
+    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:20px; margin-top:15px">
+      <div>
+        <div class="form-group"><label>Колонки (Columns)</label><input type="number" value="2" readonly></div>
+        <div class="form-group"><label>Строки (Rows)</label><input type="number" value="2" readonly></div>
+      </div>
+      <div style="background:var(--bg3); border:1px dashed var(--border2); border-radius:8px; padding:15px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="display:grid; grid-template-columns: 80px 80px; gap:10px;">
+          <div style="height:60px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:12px; font-weight:700; position:relative;">1 <div style="position:absolute; right:-12px; top:50%; transform:translateY(-50%); color:var(--accent)">→</div></div>
+          <div style="height:60px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:12px; font-weight:700; position:relative;">2 <div style="position:absolute; bottom:-12px; left:50%; transform:translateX(-50%); color:var(--accent)">↓</div></div>
+          <div style="height:60px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:12px; font-weight:700; position:relative;">4 <div style="position:absolute; left:-12px; top:50%; transform:translateY(-50%); color:var(--accent)">←</div></div>
+          <div style="height:60px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:12px; font-weight:700;">3</div>
+        </div>
+        <div style="margin-top:15px; font-size:11px; color:var(--text3)">Пример зигзагообразного (Snake) соединения 2х2 кабинета</div>
+      </div>
+    </div>
+    <p style="margin-top:15px">1. Укажите количество кабинетов по горизонтали и вертикали.</p>
+    <p>2. Задайте размер каждого кабинета в пикселях.</p>
+    <p>3. Соедините кабинеты мышкой в том порядке, в котором они соединены кабелем Ethernet.</p>
+    <p>4. Нажмите <strong>«Send to Hardware»</strong> и <strong>«Save»</strong>.</p>
+  </div>
+
+  <div class="section-title"><div class="ic"></div>Шаг 5: Загрузка контента</div>
+  <div class="grid-3">
+    <div class="card">
+      <h4>Через USB-флешку</h4>
+      <p>Загрузите видео на флешку, вставьте в A100. В PlayerMaster выберите «Play from USB» или настройте импорт во внутреннюю память.</p>
+    </div>
+    <div class="card">
+      <h4>Через Локальную сеть</h4>
+      <p>В PlayerMaster создайте «Solution» (проект), добавьте видео/картинки и нажмите «Publish» на плеер.</p>
+    </div>
+    <div class="card">
+      <h4>Через Облако (iCloud)</h4>
+      <p>Зарегистрируйте плеер на сервере <a href="https://www.colorlightcloud.com" style="color:var(--accent)" target="_blank">ColorlightCloud.com</a>. Теперь вы можете менять контент удалённо через браузер.</p>
+    </div>
+  </div>
+
+  <div class="info-box info-green" style="margin-top:20px">
+    <strong>Совет:</strong> Если изображение на экране перевёрнуто или искажено, проверьте настройки «Scan Mode» и «Phase» в параметрах приёмной карты.
   </div>
 </section>
 
