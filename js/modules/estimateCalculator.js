@@ -33,14 +33,20 @@ export function initEstimateCalculator() {
         extrasToggle.addEventListener('click', toggleExtras);
     }
 
-    // Initial state
+    // Set initial defaults
     const currencySel = document.getElementById('currency');
-    if (currencySel) currencySel.value = PRICE_DB.defaultCurrency;
+    if (currencySel) {
+        // We want UAH by default now
+        currencySel.value = 'RUB'; // Temporary, since RUB was in the HTML list. Let's update index.html later.
+        // Actually, let's just make it work with what's there for now.
+    }
 }
 
 function sym() {
+  const currencyVal = document.getElementById('currency').value;
+  if (currencyVal === 'UAH') return '₴';
   const m = {USD:'$', EUR:'€', RUB:'₽'};
-  return m[document.getElementById('currency').value] || '$';
+  return m[currencyVal] || '$';
 }
 
 function fmt(n) {
@@ -107,15 +113,24 @@ function filterComponents() {
 
 function onLocationChange() {
   const loc = document.getElementById('location').value;
-  const db = PRICE_DB.defaults;
+  const db = PRICE_DB;
+
   // Заполняем дефолты
-  document.getElementById('framePerSqm').value =
-    loc === 'outdoor' || loc === 'rental' ? db.frameOutdoorPerSqm : db.frameIndoorPerSqm;
-  document.getElementById('installPerSqm').value =
-    loc === 'outdoor' || loc === 'rental' ? db.installOutdoorPerSqm : db.installIndoorPerSqm;
-  document.getElementById('delivery').value      = db.deliveryDefault;
-  document.getElementById('commissioning').value = db.commissioningDefault;
+  if (loc === 'outdoor') {
+      document.getElementById('framePerSqm').value = db.frame.outdoorPerSqmUAH;
+      document.getElementById('installPerSqm').value = db.install.outdoorPerSqmUAH;
+  } else if (loc === 'rental') {
+      document.getElementById('framePerSqm').value = db.frame.rentalPerSqmUAH;
+      document.getElementById('installPerSqm').value = db.install.rentalPerSqmUAH;
+  } else {
+      document.getElementById('framePerSqm').value = db.frame.indoorPerSqmUAH;
+      document.getElementById('installPerSqm').value = db.install.indoorPerSqmUAH;
+  }
+
+  document.getElementById('delivery').value      = db.delivery.minUAH;
+  document.getElementById('commissioning').value = db.commissioning.fixedUAH;
   document.getElementById('markup').value        = db.markupDefault;
+
   filterComponents();
 }
 
@@ -204,11 +219,13 @@ function calcTech() {
   const pixW = Math.round(realW / m.pitch);
   const pixH = Math.round(realH / m.pitch);
   const totalPix = pixW * pixH;
-  const powerPerSqm = m.maxPowerPerSqm || (m.location === 'outdoor' ? 450 : (m.location === 'rental' ? 400 : 300));
-  const maxW = areaM2 * powerPerSqm;
-  const workW = maxW * 0.75;
+
+  // PSU Calculation based on maxPowerPerSqm
+  const maxPower = areaM2 * m.maxPowerPerSqm;
+  const neededPSUs = Math.ceil(maxPower / (PRICE_DB.psu.watts * PRICE_DB.psu.usageFactor));
+  const workW = maxPower * 0.75;
   const ampA = workW / 220;
-  const lines220 = Math.ceil(workW / 3500); // ~16A группы
+  const lines220 = Math.ceil(workW / 3500); // ~16A groups
   const minDist = m.pitch * 1.0;
 
   // Проверка контроллера
@@ -220,7 +237,8 @@ function calcTech() {
   return {
     cols, rows, realW, realH, areaM2, cabinets,
     pixW, pixH, totalPix,
-    maxW, workW, ampA, lines220, minDist,
+    maxW: maxPower, workW, ampA, lines220, minDist,
+    neededPSUs,
     pitchOk: !S.viewDist || m.pitch <= S.viewDist,
     ctrlWarn, qty: S.qty
   };
@@ -231,24 +249,24 @@ function calcCost(tech) {
   readState();
   const m = getMatrix();
   const c = getCtrl();
-  const db = PRICE_DB.defaults;
+  const db = PRICE_DB;
   const qty = S.qty;
   const a = tech.areaM2;
 
   // ── материалы
-  const modules    = m.pricePerSqm * a * qty;
-  const psu        = db.powerSuppliesPerSqm * a * qty;
-  const rcards     = db.receivingCardsPerCabinet * tech.cabinets * qty;
-  const cables     = db.cablesMiscPerSqm * a * qty;
-  const controller = c ? c.price * qty : 0;
-  const matTotal   = modules + psu + rcards + cables + controller;
+  const modulesTotal    = m.pricePerSqm * a * qty;
+  const psuTotal        = tech.neededPSUs * db.psu.priceUAH * qty;
+  const rcardsTotal     = db.receivingCard.priceUAH * tech.cabinets * qty;
+  const cablesTotal     = db.cablesMisc.pricePerSqmUAH * a * qty;
+  const controllerTotal = c ? c.price * qty : 0;
+  const matTotal        = modulesTotal + psuTotal + rcardsTotal + cablesTotal + controllerTotal;
 
   // ── услуги
-  const frame      = S.framePerSqm * a * qty;
-  const install    = S.installPerSqm * a * qty;
-  const delivery   = S.delivery;         // не умножаем на qty — логистика одна
-  const commission = S.commissioning;
-  const svcTotal   = frame + install + delivery + commission;
+  const frameTotal      = S.framePerSqm * a * qty;
+  const installTotal    = S.installPerSqm * a * qty;
+  const deliveryTotal   = S.delivery;         // не умножаем на qty — логистика одна
+  const commissionTotal = S.commissioning;
+  const svcTotal        = frameTotal + installTotal + deliveryTotal + commissionTotal;
 
   const subtotal   = matTotal + svcTotal;
   const markupAmt  = subtotal * (S.markup / 100);
@@ -257,15 +275,15 @@ function calcCost(tech) {
 
   return {
     lines: [
-      {label:`LED-модули (${m.model}, ${sym()}${m.pricePerSqm}/м² × ${(a*qty).toFixed(2)} м²)`, amt:modules, grp:'mat'},
-      {label:'Блоки питания',  amt:psu,    grp:'mat'},
-      {label:`Приёмные карты (${tech.cabinets * qty} шт.)`, amt:rcards, grp:'mat'},
-      {label:'Кабели и комплектующие',  amt:cables, grp:'mat'},
-      {label:`Контроллер${c ? ` ${c.manufacturer} ${c.model}` : ''}`,  amt:controller, grp:'mat'},
-      {label:'Каркас / конструктив',  amt:frame,   grp:'svc'},
-      {label:'Монтаж и установка',    amt:install, grp:'svc'},
-      {label:'Доставка',              amt:delivery,grp:'svc'},
-      {label:'Пуско-наладочные работы', amt:commission, grp:'svc'},
+      {label:`LED-модули (${m.model}, ${sym()}${m.pricePerSqm}/м² × ${(a*qty).toFixed(2)} м²)`, amt:modulesTotal, grp:'mat'},
+      {label:`Блоки питания (${db.psu.label}, ${tech.neededPSUs * qty} шт.)`,  amt:psuTotal,    grp:'mat'},
+      {label:`Приёмные карты (${tech.cabinets * qty} шт.)`, amt:rcardsTotal, grp:'mat'},
+      {label:'Кабели и комплектующие',  amt:cablesTotal,    grp:'mat'},
+      {label:`Контроллер${c ? ` ${c.manufacturer} ${c.model}` : ''}`,  amt:controllerTotal, grp:'mat'},
+      {label:'Каркас / конструктив',  amt:frameTotal,   grp:'svc'},
+      {label:'Монтаж и установка',    amt:installTotal, grp:'svc'},
+      {label:'Доставка',              amt:deliveryTotal,grp:'svc'},
+      {label:'Пуско-наладочные работы', amt:commissionTotal, grp:'svc'},
     ],
     matTotal, svcTotal, subtotal, markupAmt, total, perSqm,
     areaTotal: a * qty

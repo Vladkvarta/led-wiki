@@ -361,6 +361,7 @@
         <div class="form-group">
           <label>Валюта</label>
           <select id="currency">
+            <option value="UAH">₴ UAH</option>
             <option value="USD">$ USD</option>
             <option value="EUR">€ EUR</option>
             <option value="RUB">₽ RUB</option>
@@ -434,6 +435,9 @@
         Дополнительные расходы (каркас, монтаж, доставка, наценка)
       </div>
       <div class="extras-body" id="extrasBody">
+        <div style="margin-bottom:10px; font-size:11.5px; color:var(--text3); line-height:1.6">
+          💡 Цены за м² автоматически заполнены значениями по умолчанию из <code>PRICE_DB</code>. Они редактируются прямо в JS-коде.
+        </div>
         <div class="form-grid">
           <div class="form-group">
             <label>Каркас / конструкция (за м²)</label>
