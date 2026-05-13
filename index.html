@@ -337,75 +337,148 @@
   </div>
 </section>
 
-<!-- ===================== CALCULATORS ===================== -->
+<!-- ===================== ESTIMATE CALCULATOR ===================== -->
 <section class="section" id="tab-calc">
-  <div class="page-title">Калькуляторы</div>
-  <div class="grid-2">
-    <div class="calc-card">
-      <div class="calc-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>Разрешение экрана</div>
-      <div class="form-group"><label>Ширина экрана (мм)</label><input type="number" id="c1w" value="3000" min="100"></div>
-      <div class="form-group"><label>Высота экрана (мм)</label><input type="number" id="c1h" value="2000" min="100"></div>
-      <div class="form-group"><label>Шаг пикселя (мм)</label><input type="number" id="c1p" value="2.5" step="0.1" min="0.5"></div>
-      <button class="calc-btn" data-calc="calcResolution">Рассчитать</button>
-      <div class="result-box" id="r1">
-        <div class="result-row"><span class="result-label">Разрешение (пикс.)</span><span class="result-val" id="r1res">—</span></div>
-        <div class="result-row"><span class="result-label">Всего пикселей</span><span class="result-val" id="r1total">—</span></div>
-        <div class="result-row"><span class="result-label">Плотность (пикс./м²)</span><span class="result-val" id="r1dens">—</span></div>
-        <div class="result-row"><span class="result-label">Мин. дистанция просмотра</span><span class="result-val" id="r1dist">—</span></div>
+  <div class="page-title">Калькулятор сметы LED-экрана</div>
+
+  <!-- BLOCK 1 -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-num">1</div>
+      <div class="block-title">Параметры проекта и подбор компонентов</div>
+    </div>
+    <div class="block-body">
+      <div class="sect">Проект</div>
+      <div class="form-grid" style="margin-bottom:20px">
+        <div class="form-group" style="grid-column:span 2">
+          <label>Название проекта</label>
+          <input type="text" id="projectName" placeholder="Например: Торговый центр «Маяк», зал 2">
+        </div>
+        <div class="form-group">
+          <label>Количество экранов</label>
+          <input type="number" id="qty" value="1" min="1" max="100">
+        </div>
+        <div class="form-group">
+          <label>Валюта</label>
+          <select id="currency">
+            <option value="USD">$ USD</option>
+            <option value="EUR">€ EUR</option>
+            <option value="RUB">₽ RUB</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sect">Размещение и размеры экрана</div>
+      <div class="form-grid" style="margin-bottom:8px">
+        <div class="form-group">
+          <label>Место установки <span class="req">★ обязательно</span></label>
+          <select id="location">
+            <option value="">— выберите —</option>
+            <option value="indoor">🏢 Интерьер (Indoor)</option>
+            <option value="outdoor">🌤 Улица (Outdoor)</option>
+            <option value="rental">🎤 Аренда / Сцена</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Тип подключения</label>
+          <select id="connType">
+            <option value="">Любой</option>
+            <option value="cloud">Облако (Cloud)</option>
+            <option value="local">Провод (Local)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ширина экрана (мм)</label>
+          <input type="number" id="screenW" placeholder="3000" min="100">
+        </div>
+        <div class="form-group">
+          <label>Высота экрана (мм)</label>
+          <input type="number" id="screenH" placeholder="2000" min="100">
+        </div>
+        <div class="form-group">
+          <label>Дистанция просмотра (м)</label>
+          <input type="number" id="viewDist" placeholder="5" step="0.5" min="0.5">
+        </div>
+      </div>
+      <div id="pitchAdvice"></div>
+
+      <div class="divider"></div>
+      <div class="sect">Выбор компонентов</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:4px">
+        <div>
+          <div class="form-group comp-select-wrap">
+            <label>Матрица / модуль</label>
+            <select id="matrixSel">
+              <option value="">— сначала выберите место установки —</option>
+            </select>
+            <div class="comp-card" id="matrixCard">
+              <div class="comp-card-grid" id="matrixDetails"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="form-group comp-select-wrap">
+            <label>Контроллер</label>
+            <select id="ctrlSel">
+              <option value="">— сначала выберите место установки —</option>
+            </select>
+            <div class="comp-card" id="ctrlCard">
+              <div class="comp-card-grid" id="ctrlDetails"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="extras-toggle no-print" id="extrasToggle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        Дополнительные расходы (каркас, монтаж, доставка, наценка)
+      </div>
+      <div class="extras-body" id="extrasBody">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Каркас / конструкция (за м²)</label>
+            <input type="number" id="framePerSqm" min="0">
+          </div>
+          <div class="form-group">
+            <label>Монтаж и установка (за м²)</label>
+            <input type="number" id="installPerSqm" min="0">
+          </div>
+          <div class="form-group">
+            <label>Доставка (фикс.)</label>
+            <input type="number" id="delivery" min="0">
+          </div>
+          <div class="form-group">
+            <label>Пуско-наладка (фикс.)</label>
+            <input type="number" id="commissioning" min="0">
+          </div>
+          <div class="form-group">
+            <label>Наценка компании (%)</label>
+            <input type="number" id="markup" min="0" max="200">
+          </div>
+        </div>
       </div>
     </div>
-    <div class="calc-card">
-      <div class="calc-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Потребляемая мощность</div>
-      <div class="form-group"><label>Площадь экрана (м²)</label><input type="number" id="c2area" value="6" step="0.1" min="0.1"></div>
-      <div class="form-group"><label>Тип использования</label>
-        <select id="c2type">
-          <option value="outdoor">Уличный (avg ~450 Вт/м²)</option>
-          <option value="indoor" selected>Интерьерный (avg ~300 Вт/м²)</option>
-          <option value="rental">Аренда (avg ~380 Вт/м²)</option>
-          <option value="fine">Fine Pitch P1-P2 (avg ~500 Вт/м²)</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Коэффициент нагрузки (%)</label><input type="number" id="c2load" value="75" min="10" max="100"></div>
-      <button class="calc-btn" data-calc="calcPower">Рассчитать</button>
-      <div class="result-box" id="r2">
-        <div class="result-row"><span class="result-label">Макс. мощность (100%)</span><span class="result-val" id="r2max">—</span></div>
-        <div class="result-row"><span class="result-label">Рабочая мощность</span><span class="result-val" id="r2work">—</span></div>
-        <div class="result-row"><span class="result-label">Ток при 220В (рабочий)</span><span class="result-val" id="r2amp">—</span></div>
-        <div class="result-row"><span class="result-label">Кол-во БП 5В/60А (≥300Вт)</span><span class="result-val" id="r2psu">—</span></div>
-        <div class="result-row"><span class="result-label">Расход за 12ч/сут (кВт·ч)</span><span class="result-val" id="r2kwh">—</span></div>
-      </div>
+  </div>
+
+  <!-- BLOCK 2 -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-num">2</div>
+      <div class="block-title">Технические характеристики сборки</div>
     </div>
-    <div class="calc-card">
-      <div class="calc-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Подбор шага пикселя</div>
-      <div class="form-group"><label>Минимальное расстояние просмотра (м)</label><input type="number" id="c3dist" value="5" step="0.5" min="0.5"></div>
-      <div class="form-group"><label>Условия размещения</label>
-        <select id="c3env">
-          <option value="indoor">Интерьер (критерий 1.0×)</option>
-          <option value="outdoor">Улица (критерий 1.4×)</option>
-          <option value="stage">Сцена (критерий 0.9×)</option>
-        </select>
-      </div>
-      <button class="calc-btn" data-calc="calcPitch">Рассчитать</button>
-      <div class="result-box" id="r3">
-        <div class="result-row"><span class="result-label">Рекомендуемый шаг</span><span class="result-val" id="r3pitch">—</span></div>
-        <div class="result-row"><span class="result-label">Максимальный шаг</span><span class="result-val" id="r3max">—</span></div>
-        <div class="result-row"><span class="result-label">Для 4K при ширине 4м</span><span class="result-val" id="r3_4k">—</span></div>
-      </div>
+    <div class="block-body" id="techBlock">
+      <div class="placeholder">Заполните параметры экрана в блоке 1, чтобы увидеть технические характеристики.</div>
     </div>
-    <div class="calc-card">
-      <div class="calc-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Количество кабинетов</div>
-      <div class="form-group"><label>Ширина экрана (мм)</label><input type="number" id="c4sw" value="4000" min="100"></div>
-      <div class="form-group"><label>Высота экрана (мм)</label><input type="number" id="c4sh" value="2500" min="100"></div>
-      <div class="form-group"><label>Ширина кабинета (мм)</label><input type="number" id="c4cw" value="500" min="100"></div>
-      <div class="form-group"><label>Высота кабинета (мм)</label><input type="number" id="c4ch" value="500" min="100"></div>
-      <button class="calc-btn" data-calc="calcCabinets">Рассчитать</button>
-      <div class="result-box" id="r4">
-        <div class="result-row"><span class="result-label">Кабинетов по ширине</span><span class="result-val" id="r4cw">—</span></div>
-        <div class="result-row"><span class="result-label">Кабинетов по высоте</span><span class="result-val" id="r4ch">—</span></div>
-        <div class="result-row"><span class="result-label">Итого кабинетов</span><span class="result-val" id="r4total">—</span></div>
-        <div class="result-row"><span class="result-label">Реальный размер экрана</span><span class="result-val" id="r4real">—</span></div>
-        <div class="result-row"><span class="result-label">Площадь (м²)</span><span class="result-val" id="r4area">—</span></div>
-      </div>
+  </div>
+
+  <!-- BLOCK 3 -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-num">3</div>
+      <div class="block-title">Смета</div>
+    </div>
+    <div class="block-body" id="estBlock">
+      <div class="placeholder">Выберите матрицу и задайте размеры экрана, чтобы получить смету.</div>
     </div>
   </div>
 </section>
