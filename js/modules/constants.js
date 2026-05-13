@@ -28,7 +28,7 @@ export const columns = [
   {key:'bestUse',     label:'Best Use Case',  group:'commercial'},
   {key:'setupComplexity',label:'Сложность',   group:'commercial',  sortable:true},
   {key:'reliability', label:'Надёжность',     group:'commercial',  sortable:true, fmt:'stars'},
-  {key:'price',       label:'Цена (USD)',     group:'commercial',  sortable:true, gk:'price',    fmt:'price'},
+  {key:'price',       label:'Цена (UAH)',     group:'commercial',  sortable:true, gk:'price',    fmt:'price'},
   {key:'availability',label:'Наличие',        group:'commercial'},
   {key:'warranty',    label:'Гарантия (лет)', group:'commercial',  sortable:true},
 ];

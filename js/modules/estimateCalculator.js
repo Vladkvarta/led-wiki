@@ -6,7 +6,7 @@ const S = {
   location: '', connType: '',
   screenW: 0, screenH: 0, viewDist: 0, assemblySide: 1,
   matrixId: '', ctrlId: '',
-  framePerSqm: 0, installPerSqm: 0, delivery: 0, commissioning: 0, markup: 0,
+  frameFixed: 0, installFixed: 0, delivery: 0, commissioning: 0, discount: 0,
 };
 
 export function initEstimateCalculator() {
@@ -24,15 +24,10 @@ export function initEstimateCalculator() {
     document.getElementById('matrixSel').addEventListener('change', onMatrixChange);
     document.getElementById('ctrlSel').addEventListener('change', onCtrlChange);
 
-    ['framePerSqm', 'installPerSqm', 'delivery', 'commissioning', 'markup'].forEach(id => {
+    ['frameFixed', 'installFixed', 'delivery', 'commissioning', 'discount'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', refreshAll);
     });
-
-    const extrasToggle = document.getElementById('extrasToggle');
-    if (extrasToggle) {
-        extrasToggle.addEventListener('click', toggleExtras);
-    }
 
     // Set initial defaults
     const currencySel = document.getElementById('currency');
@@ -66,11 +61,11 @@ function readState() {
   S.assemblySide = parseInt(document.getElementById('assemblySide').value) || 1;
   S.matrixId     = document.getElementById('matrixSel').value;
   S.ctrlId       = document.getElementById('ctrlSel').value;
-  S.framePerSqm    = parseFloat(document.getElementById('framePerSqm').value) || 0;
-  S.installPerSqm  = parseFloat(document.getElementById('installPerSqm').value) || 0;
+  S.frameFixed    = parseFloat(document.getElementById('frameFixed').value) || 0;
+  S.installFixed  = parseFloat(document.getElementById('installFixed').value) || 0;
   S.delivery       = parseFloat(document.getElementById('delivery').value) || 0;
   S.commissioning  = parseFloat(document.getElementById('commissioning').value) || 0;
-  S.markup         = parseFloat(document.getElementById('markup').value) || 0;
+  S.discount       = parseFloat(document.getElementById('discount').value) || 0;
 }
 
 function getMatrix() { return matrices.find(m => m.id === S.matrixId) || null; }
@@ -119,19 +114,19 @@ function onLocationChange() {
   const db = PRICE_DB;
 
   if (loc === 'outdoor') {
-      document.getElementById('framePerSqm').value = db.frame.outdoorPerSqmUAH;
-      document.getElementById('installPerSqm').value = db.install.outdoorPerSqmUAH;
+      document.getElementById('frameFixed').value = db.frame.outdoorPerSqmUAH;
+      document.getElementById('installFixed').value = db.install.outdoorPerSqmUAH;
   } else if (loc === 'rental') {
-      document.getElementById('framePerSqm').value = db.frame.rentalPerSqmUAH;
-      document.getElementById('installPerSqm').value = db.install.rentalPerSqmUAH;
+      document.getElementById('frameFixed').value = db.frame.rentalPerSqmUAH;
+      document.getElementById('installFixed').value = db.install.rentalPerSqmUAH;
   } else {
-      document.getElementById('framePerSqm').value = db.frame.indoorPerSqmUAH;
-      document.getElementById('installPerSqm').value = db.install.indoorPerSqmUAH;
+      document.getElementById('frameFixed').value = db.frame.indoorPerSqmUAH;
+      document.getElementById('installFixed').value = db.install.indoorPerSqmUAH;
   }
 
   document.getElementById('delivery').value      = db.delivery.minUAH;
   document.getElementById('commissioning').value = db.commissioning.fixedUAH;
-  document.getElementById('markup').value        = db.markupDefault;
+  document.getElementById('discount').value      = 0;
 
   filterComponents();
 }
@@ -167,13 +162,6 @@ function onCtrlChange() {
   ].map(([k,v]) => `<div style="flex:1 1 45%; margin-bottom:4px;"><b>${k}:</b> ${v}</div>`).join('');
   card.classList.add('show');
   refreshAll();
-}
-
-function toggleExtras() {
-  const btn  = document.getElementById('extrasToggle');
-  const body = document.getElementById('extrasBody');
-  btn.classList.toggle('open');
-  body.classList.toggle('show');
 }
 
 function updatePitchAdvice() {
@@ -251,25 +239,27 @@ function calcCost(tech) {
   const side = S.assemblySide;
   const a = tech.areaM2;
 
-  // ── материалы
+  // ── материалы (теперь включают Каркас)
   const modulesTotal    = m.pricePerSqm * a * side;
   const psuTotal        = tech.neededPSUs * db.psu.priceUAH;
   const rcardsTotal     = db.receivingCard.priceUAH * tech.cabinetsPerSide * side;
   const cablesTotal     = db.cablesMisc.pricePerSqmUAH * a * side;
-  const controllerTotal = c ? c.price : 0; // Контроллер обычно один на систему (или каскад, но тут упрощаем)
-  const matTotal        = modulesTotal + psuTotal + rcardsTotal + cablesTotal + controllerTotal;
+  const controllerTotal = c ? c.price : 0;
+  const frameTotal      = S.frameFixed; // теперь в материалах
+  const matTotal        = modulesTotal + psuTotal + rcardsTotal + cablesTotal + controllerTotal + frameTotal;
 
-  // ── услуги (теперь считаем за изделие)
-  const frameTotal      = S.framePerSqm;
-  const installTotal    = S.installPerSqm;
+  // ── работы и логистика
+  const installTotal    = S.installFixed;
   const deliveryTotal   = S.delivery;
   const commissionTotal = S.commissioning;
-  const svcTotal        = frameTotal + installTotal + deliveryTotal + commissionTotal;
+  const svcSubtotal     = installTotal + deliveryTotal + commissionTotal;
 
-  const subtotal   = matTotal + svcTotal;
-  const markupAmt  = subtotal * (S.markup / 100);
-  const total      = subtotal + markupAmt;
-  const perSqm     = total / (a * side);
+  // Скидка только на работы
+  const discountAmt     = svcSubtotal * (S.discount / 100);
+  const svcTotal        = svcSubtotal - discountAmt;
+
+  const total           = matTotal + svcTotal;
+  const perSqm          = total / (a * side);
 
   return {
     lines: [
@@ -278,12 +268,12 @@ function calcCost(tech) {
       {label:`Приёмные карты (${tech.cabinetsPerSide * side} шт.)`, amt:rcardsTotal, grp:'mat'},
       {label:'Кабели и комплектующие',  amt:cablesTotal,    grp:'mat'},
       {label:`Контроллер${c ? ` ${c.manufacturer} ${c.model}` : ''}`,  amt:controllerTotal, grp:'mat'},
-      {label:'Каркас / конструктив',  amt:frameTotal,   grp:'svc'},
+      {label:'Каркас / конструктив',  amt:frameTotal,   grp:'mat'}, // Перенесено в mat
       {label:'Монтаж и установка',    amt:installTotal, grp:'svc'},
       {label:'Доставка',              amt:deliveryTotal,grp:'svc'},
       {label:'Пуско-наладочные работы', amt:commissionTotal, grp:'svc'},
     ],
-    matTotal, svcTotal, subtotal, markupAmt, total, perSqm,
+    matTotal, svcTotal, svcSubtotal, discountAmt, total, perSqm,
     areaTotal: a * side
   };
 }
@@ -368,9 +358,7 @@ function renderEst(cost) {
         <tr class="total-row"><td>Итого материалы</td><td class="amount">${fmt(cost.matTotal)}</td></tr>
         <tr class="grp-header"><td colspan="2">Работы и логистика</td></tr>
         ${rows(svcLines)}
-        <tr class="total-row"><td>Итого работы</td><td class="amount">${fmt(cost.svcTotal)}</td></tr>
-        <tr class="total-row"><td>Сумма без наценки</td><td class="amount">${fmt(cost.subtotal)}</td></tr>
-        <tr class="markup-row"><td>Наценка ${S.markup}%</td><td class="amount">${fmt(cost.markupAmt)}</td></tr>
+        <tr class="total-row"><td>Итого работы${cost.discountAmt > 0 ? ` (скидка ${S.discount}%)` : ''}</td><td class="amount">${fmt(cost.svcTotal)}</td></tr>
         <tr class="grand-row"><td>ИТОГО К ОПЛАТЕ</td><td class="amount">${fmt(cost.total)}</td></tr>
         <tr class="sqm-row"><td>Стоимость «под ключ» за 1 м²</td><td class="amount">${fmt(cost.perSqm)} / м²</td></tr>
       </tbody>

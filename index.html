@@ -441,35 +441,28 @@
         </div>
       </div>
 
-      <div class="extras-toggle no-print" id="extrasToggle">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        Дополнительные расходы (каркас, монтаж, доставка, наценка)
-      </div>
-      <div class="extras-body" id="extrasBody">
-        <div style="margin-bottom:10px; font-size:11.5px; color:var(--text3); line-height:1.6">
-          💡 Цены за м² автоматически заполнены значениями по умолчанию из <code>PRICE_DB</code>. Они редактируются прямо в JS-коде.
+      <div class="divider"></div>
+      <div class="sect">Дополнительные расходы</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Каркас / конструкция</label>
+          <input type="number" id="frameFixed" min="0">
         </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Каркас / конструкция</label>
-            <input type="number" id="framePerSqm" min="0">
-          </div>
-          <div class="form-group">
-            <label>Монтаж и установка</label>
-            <input type="number" id="installPerSqm" min="0">
-          </div>
-          <div class="form-group">
-            <label>Доставка</label>
-            <input type="number" id="delivery" min="0">
-          </div>
-          <div class="form-group">
-            <label>Пуско-наладка</label>
-            <input type="number" id="commissioning" min="0">
-          </div>
-          <div class="form-group">
-            <label>Наценка компании (%)</label>
-            <input type="number" id="markup" min="0" max="200">
-          </div>
+        <div class="form-group">
+          <label>Монтаж и установка</label>
+          <input type="number" id="installFixed" min="0">
+        </div>
+        <div class="form-group">
+          <label>Доставка</label>
+          <input type="number" id="delivery" min="0">
+        </div>
+        <div class="form-group">
+          <label>Пуско-наладка</label>
+          <input type="number" id="commissioning" min="0">
+        </div>
+        <div class="form-group">
+          <label>Скидка на работы (%)</label>
+          <input type="number" id="discount" min="0" max="100" value="0">
         </div>
       </div>
     </div>
