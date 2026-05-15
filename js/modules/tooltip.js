@@ -1,32 +1,25 @@
-import { glossary } from '../data/glossary.js';
-
-const tt = document.getElementById('tt');
-const tti = document.getElementById('ttInner');
-let ttKey = null;
+import { DB } from '../data/database.js';
 
 export function initTooltip() {
-    document.addEventListener('mousemove', e => { if (ttKey) moveTT(e); });
+  // Tooltips are triggered by other modules
 }
 
-export function showTT(e, key) {
-  const g = glossary[key];
+export function showTT(e, gk) {
+  const g = DB.glossary[gk];
   if (!g) return;
-  ttKey = key;
-  tti.innerHTML = `<div class="tt-title">${g.title}</div><div class="tt-desc">${g.description}</div><div class="tt-imp">${g.importance}</div>`;
+  const tt = document.getElementById('tt');
+  const inner = document.getElementById('ttInner');
+  inner.innerHTML = `
+    <div class="tt-title">${g.title}</div>
+    <div class="tt-desc">${g.description}</div>
+    <div class="tt-imp">${g.importance}</div>
+  `;
   tt.style.display = 'block';
-  moveTT(e);
-}
-
-function moveTT(e) {
-  const x = e.clientX + 14, y = e.clientY + 10;
-  const tw = 280, th = tt.offsetHeight || 120;
-  const fx = x + tw > window.innerWidth ? e.clientX - tw - 10 : x;
-  const fy = y + th > window.innerHeight ? e.clientY - th - 10 : y;
-  tt.style.left = fx + 'px';
-  tt.style.top  = fy + 'px';
+  tt.style.left = (e.pageX + 15) + 'px';
+  tt.style.top = (e.pageY + 15) + 'px';
 }
 
 export function hideTT() {
-    tt.style.display = 'none';
-    ttKey = null;
+  const tt = document.getElementById('tt');
+  if (tt) tt.style.display = 'none';
 }

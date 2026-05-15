@@ -1,12 +1,11 @@
-import { matrices } from '../data/matrices.js';
-import { controllers } from '../data/controllers.js';
-import { PRICE_DB } from '../data/prices.js';
+import { DB } from '../data/database.js';
 
 const S = {
-  location: '', connType: '',
+  location: '',
   screenW: 0, screenH: 0, viewDist: 0, assemblySide: 1,
   matrixId: '', ctrlId: '',
   frameFixed: 0, installFixed: 0, delivery: 0, commissioning: 0, discount: 0,
+  currency: 'UAH'
 };
 
 export function initEstimateCalculator() {
@@ -14,367 +13,246 @@ export function initEstimateCalculator() {
     if (!locSel) return;
 
     locSel.addEventListener('change', onLocationChange);
-    document.getElementById('connType').addEventListener('change', filterComponents);
-    document.getElementById('screenW').addEventListener('input', onDimChange);
-    document.getElementById('screenH').addEventListener('input', onDimChange);
+    document.getElementById('screenW').addEventListener('input', refreshAll);
+    document.getElementById('screenH').addEventListener('input', refreshAll);
     document.getElementById('viewDist').addEventListener('change', refreshAll);
     document.getElementById('assemblySide').addEventListener('change', refreshAll);
-    document.getElementById('currency').addEventListener('change', refreshAll);
+    document.getElementById('currency').addEventListener('change', (e) => {
+        S.currency = e.target.value;
+        refreshAll();
+    });
 
     document.getElementById('matrixSel').addEventListener('change', onMatrixChange);
     document.getElementById('ctrlSel').addEventListener('change', onCtrlChange);
 
     ['frameFixed', 'installFixed', 'delivery', 'commissioning', 'discount'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', refreshAll);
+        document.getElementById(id).addEventListener('input', refreshAll);
     });
 
-    // Set initial defaults
-    const currencySel = document.getElementById('currency');
-    if (currencySel) {
-        currencySel.value = 'UAH';
-    }
+    // Populate initial selects
+    S.currency = document.getElementById('currency').value;
+}
+
+function getRate() {
+    return S.currency === 'USD' ? 1 : DB.config.usdRate;
 }
 
 function sym() {
-  const currencyEl = document.getElementById('currency');
-  if (!currencyEl) return '₴';
-  const currencyVal = currencyEl.value;
-  if (currencyVal === 'UAH') return '₴';
-  const m = {USD:'$', EUR:'€'};
-  return m[currencyVal] || '$';
+    return S.currency === 'USD' ? '$' : '₴';
 }
 
 function fmt(n) {
-  if (!n && n !== 0) return '—';
-  return sym() + Math.round(n).toLocaleString('ru-RU');
+    if (!n && n !== 0) return '—';
+    return sym() + Math.round(n).toLocaleString('ru-RU');
 }
 
 function readState() {
-  const locEl = document.getElementById('location');
-  if (!locEl) return;
-  S.location     = locEl.value;
-  S.connType     = document.getElementById('connType').value;
-  S.screenW      = parseFloat(document.getElementById('screenW').value) || 0;
-  S.screenH      = parseFloat(document.getElementById('screenH').value) || 0;
-  S.viewDist     = parseFloat(document.getElementById('viewDist').value) || 0;
-  S.assemblySide = parseInt(document.getElementById('assemblySide').value) || 1;
-  S.matrixId     = document.getElementById('matrixSel').value;
-  S.ctrlId       = document.getElementById('ctrlSel').value;
-  S.frameFixed    = parseFloat(document.getElementById('frameFixed').value) || 0;
-  S.installFixed  = parseFloat(document.getElementById('installFixed').value) || 0;
-  S.delivery       = parseFloat(document.getElementById('delivery').value) || 0;
-  S.commissioning  = parseFloat(document.getElementById('commissioning').value) || 0;
-  S.discount       = parseFloat(document.getElementById('discount').value) || 0;
-}
-
-function getMatrix() { return matrices.find(m => m.id === S.matrixId) || null; }
-function getCtrl()   { return controllers.find(c => c.id === S.ctrlId) || null; }
-
-function filterComponents() {
-  readState();
-  const loc = S.location;
-  const conn = S.connType;
-
-  const mSel = document.getElementById('matrixSel');
-  const cSel = document.getElementById('ctrlSel');
-
-  if (!loc) {
-    mSel.innerHTML = '<option value="">— сначала выберите место установки —</option>';
-    cSel.innerHTML = '<option value="">— сначала выберите место установки —</option>';
-    return;
-  }
-
-  // Матрицы
-  const mFiltered = matrices.filter(m => m.location === loc);
-  mSel.innerHTML = '<option value="">— выберите матрицу —</option>' +
-    mFiltered.map(m =>
-      `<option value="${m.id}">${m.model} | P${m.pitch} | ${sym()}${m.pricePerSqm}/м²</option>`
-    ).join('');
-
-  // Контроллеры
-  let cFiltered = controllers;
-  if (conn === 'cloud')  cFiltered = cFiltered.filter(c => c.cloud);
-  if (conn === 'local')  cFiltered = cFiltered.filter(c => !c.cloud);
-
-  cSel.innerHTML = '<option value="">— выберите контроллер —</option>' +
-    cFiltered.map(c =>
-      `<option value="${c.id}">${c.manufacturer} ${c.model} | ${c.type} | ${sym()}${c.price.toLocaleString('ru-RU')}</option>`
-    ).join('');
-
-  // Сбросить карточки
-  document.getElementById('matrixCard').classList.remove('show');
-  document.getElementById('ctrlCard').classList.remove('show');
-
-  refreshAll();
+    S.location     = document.getElementById('location').value;
+    S.screenW      = parseFloat(document.getElementById('screenW').value) || 0;
+    S.screenH      = parseFloat(document.getElementById('screenH').value) || 0;
+    S.viewDist     = parseFloat(document.getElementById('viewDist').value) || 0;
+    S.assemblySide = parseInt(document.getElementById('assemblySide').value) || 1;
+    S.matrixId     = document.getElementById('matrixSel').value;
+    S.ctrlId       = document.getElementById('ctrlSel').value;
+    S.frameFixed   = parseFloat(document.getElementById('frameFixed').value) || 0;
+    S.installFixed = parseFloat(document.getElementById('installFixed').value) || 0;
+    S.delivery     = parseFloat(document.getElementById('delivery').value) || 0;
+    S.commissioning = parseFloat(document.getElementById('commissioning').value) || 0;
+    S.discount     = parseFloat(document.getElementById('discount').value) || 0;
 }
 
 function onLocationChange() {
-  const loc = document.getElementById('location').value;
-  const db = PRICE_DB;
+    readState();
+    const mSel = document.getElementById('matrixSel');
+    const cSel = document.getElementById('ctrlSel');
 
-  if (loc === 'outdoor') {
-      document.getElementById('frameFixed').value = db.frame.outdoorPerSqmUAH;
-      document.getElementById('installFixed').value = db.install.outdoorPerSqmUAH;
-  } else if (loc === 'rental') {
-      document.getElementById('frameFixed').value = db.frame.rentalPerSqmUAH;
-      document.getElementById('installFixed').value = db.install.rentalPerSqmUAH;
-  } else {
-      document.getElementById('frameFixed').value = db.frame.indoorPerSqmUAH;
-      document.getElementById('installFixed').value = db.install.indoorPerSqmUAH;
-  }
+    if (!S.location) {
+        mSel.innerHTML = '<option value="">— сначала выберите место установки —</option>';
+        cSel.innerHTML = '<option value="">— сначала выберите место установки —</option>';
+        return;
+    }
 
-  document.getElementById('delivery').value      = db.delivery.minUAH;
-  document.getElementById('commissioning').value = db.commissioning.fixedUAH;
-  document.getElementById('discount').value      = 0;
+    const mFiltered = DB.matrices.filter(m => m.location === S.location);
+    mSel.innerHTML = '<option value="">— выберите матрицу —</option>' +
+        mFiltered.map(m => `<option value="${m.id}">${m.model} | P${m.pitch}</option>`).join('');
 
-  filterComponents();
+    cSel.innerHTML = '<option value="">— выберите контроллер —</option>' +
+        DB.controllers.map(c => `<option value="${c.id}">${c.manufacturer} ${c.model}</option>`).join('');
+
+    // Set default fixed costs (convert UAH defaults to current currency if needed, but here we store input in UAH)
+    document.getElementById('frameFixed').value = DB.prices.fixedCosts.frameUAH;
+    document.getElementById('installFixed').value = DB.prices.fixedCosts.installUAH;
+    document.getElementById('delivery').value = DB.prices.fixedCosts.deliveryUAH;
+    document.getElementById('commissioning').value = DB.prices.fixedCosts.commissioningUAH;
+
+    refreshAll();
 }
 
-function onDimChange() { refreshAll(); }
-
 function onMatrixChange() {
-  const m = matrices.find(x => x.id === document.getElementById('matrixSel').value);
-  const card = document.getElementById('matrixCard');
-  const det  = document.getElementById('matrixDetails');
-  if (!m) { card.classList.remove('show'); refreshAll(); return; }
-  det.innerHTML = [
-    ['Шаг пикселя', `P${m.pitch} мм`],
-    ['Яркость',     `${m.brightness} нит`],
-    ['Refresh',     `${m.refreshHz} Hz`],
-    ['Кабинет',     `${m.cabinetW}×${m.cabinetH} мм`],
-    ['Цена/м²',     `${sym()}${m.pricePerSqm}`],
-  ].map(([k,v]) => `<div style="flex:1 1 45%; margin-bottom:4px;"><b>${k}:</b> ${v}</div>`).join('');
-  card.classList.add('show');
-  refreshAll();
+    const m = DB.matrices.find(x => x.id === document.getElementById('matrixSel').value);
+    const card = document.getElementById('matrixCard');
+    const det  = document.getElementById('matrixDetails');
+    if (!m) { card.classList.remove('show'); refreshAll(); return; }
+
+    det.innerHTML = `
+        <div><b>Модуль:</b> ${m.moduleW}×${m.moduleH}мм</div>
+        <div><b>Питание:</b> ${m.voltage}V</div>
+        <div><b>Мощность:</b> ${m.maxPowerPerModule}Вт</div>
+        <div><b>Светодиод:</b> ${m.wire === 'Au' ? 'Золото' : 'Медь'}</div>
+    `;
+    card.classList.add('show');
+    refreshAll();
 }
 
 function onCtrlChange() {
-  const c = controllers.find(x => x.id === document.getElementById('ctrlSel').value);
-  const card = document.getElementById('ctrlCard');
-  const det  = document.getElementById('ctrlDetails');
-  if (!c) { card.classList.remove('show'); refreshAll(); return; }
-  det.innerHTML = [
-    ['Тип',        c.type],
-    ['Макс. пикс.',`${(c.maxPixels/1e6).toFixed(1)}M`],
-    ['Cloud',      c.cloud ? c.cloudPlatform : 'Нет'],
-    ['Цена',       `${sym()}${c.price.toLocaleString('ru-RU')}`],
-  ].map(([k,v]) => `<div style="flex:1 1 45%; margin-bottom:4px;"><b>${k}:</b> ${v}</div>`).join('');
-  card.classList.add('show');
-  refreshAll();
-}
+    const c = DB.controllers.find(x => x.id === document.getElementById('ctrlSel').value);
+    const card = document.getElementById('ctrlCard');
+    const det  = document.getElementById('ctrlDetails');
+    if (!c) { card.classList.remove('show'); refreshAll(); return; }
 
-function updatePitchAdvice() {
-  const el = document.getElementById('pitchAdvice');
-  if (!el) return;
-  const dist = parseFloat(document.getElementById('viewDist').value) || 0;
-  const matrix = getMatrix();
-  if (!dist) { el.innerHTML = ''; return; }
-
-  const recPitch = dist / 1.0;
-  const suggested = recPitch.toFixed(1);
-
-  if (!matrix) {
-    el.innerHTML = `<div class="pitch-advice pitch-ok">Рекомендуемый шаг для дистанции ${dist} м: <b>≤ P${suggested}</b>. Выберите матрицу из списка.</div>`;
-    return;
-  }
-
-  if (matrix.pitch <= recPitch) {
-    el.innerHTML = `<div class="pitch-advice pitch-ok">✓ Матрица P${matrix.pitch} подходит для дистанции ${dist} м (рекомендуется ≤ P${suggested}).</div>`;
-  } else if (matrix.pitch <= recPitch * 1.4) {
-    el.innerHTML = `<div class="pitch-advice pitch-warn">⚠ P${matrix.pitch} — допустимо, но чёткость будет ограничена. Рекомендуется ≤ P${suggested}.</div>`;
-  } else {
-    el.innerHTML = `<div class="pitch-advice pitch-bad">✗ P${matrix.pitch} не подходит для дистанции ${dist} м. Нужна матрица ≤ P${suggested}.</div>`;
-  }
-}
-
-function calcTech() {
-  readState();
-  const m = getMatrix();
-  if (!m || !S.screenW || !S.screenH) return null;
-
-  const cols = Math.max(1, Math.round(S.screenW / m.cabinetW));
-  const rows = Math.max(1, Math.round(S.screenH / m.cabinetH));
-  const realW = cols * m.cabinetW;
-  const realH = rows * m.cabinetH;
-  const areaM2 = (realW / 1000) * (realH / 1000);
-  const cabinetsPerSide = cols * rows;
-  const pixW = Math.round(realW / m.pitch);
-  const pixH = Math.round(realH / m.pitch);
-  const totalPixPerSide = pixW * pixH;
-
-  const maxPowerPerSide = areaM2 * m.maxPowerPerSqm;
-  const neededPSUsPerSide = Math.ceil(maxPowerPerSide / (PRICE_DB.psu.watts * PRICE_DB.psu.usageFactor));
-  const workWPerSide = maxPowerPerSide * 0.75;
-  const minDist = m.pitch * 1.0;
-
-  const side = S.assemblySide;
-
-  // Проверка контроллера
-  const ctrl = getCtrl();
-  const ctrlWarn = ctrl && (totalPixPerSide * side) > ctrl.maxPixels
-    ? `⚠ ${ctrl.model} рассчитан на ${(ctrl.maxPixels/1e6).toFixed(1)}M пикс. — требуется каскад или замена контроллера.`
-    : null;
-
-  return {
-    cols, rows, realW, realH, areaM2, cabinetsPerSide,
-    pixW, pixH, totalPixPerSide,
-    maxW: maxPowerPerSide * side,
-    workW: workWPerSide * side,
-    ampA: (workWPerSide * side) / 220,
-    lines220: Math.ceil((workWPerSide * side) / 3500),
-    minDist,
-    neededPSUs: neededPSUsPerSide * side,
-    pitchOk: !S.viewDist || m.pitch <= S.viewDist,
-    ctrlWarn, assemblySide: side
-  };
-}
-
-function calcCost(tech) {
-  if (!tech) return null;
-  readState();
-  const m = getMatrix();
-  const c = getCtrl();
-  const db = PRICE_DB;
-  const side = S.assemblySide;
-  const a = tech.areaM2;
-
-  // ── материалы (теперь включают Каркас)
-  const modulesTotal    = m.pricePerSqm * a * side;
-  const psuTotal        = tech.neededPSUs * db.psu.priceUAH;
-  const rcardsTotal     = db.receivingCard.priceUAH * tech.cabinetsPerSide * side;
-  const cablesTotal     = db.cablesMisc.pricePerSqmUAH * a * side;
-  const controllerTotal = c ? c.price : 0;
-  const frameTotal      = S.frameFixed; // теперь в материалах
-  const matTotal        = modulesTotal + psuTotal + rcardsTotal + cablesTotal + controllerTotal + frameTotal;
-
-  // ── работы и логистика
-  const installTotal    = S.installFixed;
-  const deliveryTotal   = S.delivery;
-  const commissionTotal = S.commissioning;
-  const svcSubtotal     = installTotal + deliveryTotal + commissionTotal;
-
-  // Скидка только на работы
-  const discountAmt     = svcSubtotal * (S.discount / 100);
-  const svcTotal        = svcSubtotal - discountAmt;
-
-  const total           = matTotal + svcTotal;
-  const perSqm          = total / (a * side);
-
-  return {
-    lines: [
-      {label:`LED-модули (${m.model}, ${sym()}${m.pricePerSqm}/м² × ${(a*side).toFixed(2)} м²)`, amt:modulesTotal, grp:'mat'},
-      {label:`Блоки питания (${db.psu.label}, ${tech.neededPSUs} шт.)`,  amt:psuTotal,    grp:'mat'},
-      {label:`Приёмные карты (${tech.cabinetsPerSide * side} шт.)`, amt:rcardsTotal, grp:'mat'},
-      {label:'Кабели и комплектующие',  amt:cablesTotal,    grp:'mat'},
-      {label:`Контроллер${c ? ` ${c.manufacturer} ${c.model}` : ''}`,  amt:controllerTotal, grp:'mat'},
-      {label:'Каркас / конструктив',  amt:frameTotal,   grp:'mat'}, // Перенесено в mat
-      {label:'Монтаж и установка',    amt:installTotal, grp:'svc'},
-      {label:'Доставка',              amt:deliveryTotal,grp:'svc'},
-      {label:'Пуско-наладочные работы', amt:commissionTotal, grp:'svc'},
-    ],
-    matTotal, svcTotal, svcSubtotal, discountAmt, total, perSqm,
-    areaTotal: a * side
-  };
-}
-
-function renderTech(tech) {
-  const el = document.getElementById('techBlock');
-  if (!el) return;
-  if (!tech) {
-    el.innerHTML = '<div class="placeholder">Заполните параметры экрана в блоке 1, чтобы увидеть технические характеристики.</div>';
-    return;
-  }
-  const m = getMatrix();
-  const c = getCtrl();
-
-  const chips = [
-    {v:`${tech.realW / 1000} × ${tech.realH / 1000} м`,  k:'Реальный размер'},
-    {v:`${tech.areaM2.toFixed(2)} м²`,                   k:'Площадь (1 сторона)'},
-    {v:`${tech.cols} × ${tech.rows}`,                    k:'Кабинетов (на сторону)'},
-    {v:`${tech.cabinetsPerSide * tech.assemblySide}`,   k:'Кабинетов всего'},
-    {v:`${tech.pixW} × ${tech.pixH}`,                   k:'Разрешение пикс.'},
-    {v:`${(tech.totalPixPerSide/1e6).toFixed(2)}M`,     k:'Пикселей на сторону'},
-    {v:`${Math.round(tech.maxW)} Вт`,                    k:'Пиковая мощность'},
-    {v:`${Math.round(tech.workW)} Вт`,                   k:'Рабочая мощность'},
-    {v:`${tech.ampA.toFixed(1)} А`,                     k:'Ток 220В (рабочий)'},
-    {v:`${tech.lines220}`,                               k:'Групп питания 16А'},
-    {v:`${tech.minDist.toFixed(1)} м`,                  k:'Мин. дистанция'},
-  ];
-  if (tech.assemblySide > 1) chips.unshift({v:`${tech.assemblySide}`, k:'Сторон сборки'});
-
-  const warnings = [];
-  if (S.viewDist && m && m.pitch > S.viewDist) {
-    warnings.push({cls:'bad', txt:`Шаг P${m.pitch} велик для дистанции ${S.viewDist} м. Рекомендуется ≤ P${S.viewDist.toFixed(1)}.`});
-  } else if (S.viewDist && m) {
-    warnings.push({cls:'ok', txt:`Шаг P${m.pitch} подходит для дистанции ${S.viewDist} м.`});
-  }
-  if (tech.ctrlWarn) warnings.push({cls:'warn', txt: tech.ctrlWarn});
-  if (tech.lines220 > 1) warnings.push({cls:'warn', txt:`Требуется ${tech.lines220} группы питания 220В/16А — учтите при проектировании электрики.`});
-  if (c && (tech.totalPixPerSide * tech.assemblySide) <= c.maxPixels) {
-    warnings.push({cls:'ok', txt:`Контроллер ${c.model} покрывает ${(tech.totalPixPerSide * tech.assemblySide / 1e6).toFixed(2)}M пикс. (макс. ${(c.maxPixels/1e6).toFixed(1)}M). ✓`});
-  }
-
-  el.innerHTML =
-    `<div class="tech-grid">${chips.map(ch =>
-      `<div class="tech-chip"><div class="tv">${ch.v}</div><div class="tk">${ch.k}</div></div>`
-    ).join('')}</div>` +
-    (warnings.length ? warnings.map(w => `<div class="warn-chip ${w.cls}"><span>${w.txt}</span></div>`).join('') : '');
-}
-
-function renderEst(cost) {
-  const el = document.getElementById('estBlock');
-  if (!el) return;
-  if (!cost) {
-    el.innerHTML = '<div class="placeholder">Выберите матрицу и задайте размеры экрана, чтобы получить смету.</div>';
-    return;
-  }
-  const name = document.getElementById('projectName').value || 'LED-экран';
-  const now = new Date().toLocaleDateString('ru-RU');
-
-  const matLines = cost.lines.filter(l => l.grp === 'mat');
-  const svcLines = cost.lines.filter(l => l.grp === 'svc');
-
-  const rows = (lines) => lines.map(l =>
-    `<tr><td>${l.label}</td><td class="amount">${l.amt > 0 ? fmt(l.amt) : '—'}</td></tr>`
-  ).join('');
-
-  el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <div>
-        <div style="font-size:17px;font-weight:900;color:var(--text)">${name}</div>
-        <div style="font-size:12px;color:var(--text3)">Коммерческое предложение · ${now}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:var(--text3)">Площадь под ключ</div>
-        <div style="font-size:14px;font-weight:700;color:var(--accent)">${cost.areaTotal.toFixed(2)} м²</div>
-      </div>
-    </div>
-    <table class="est-table">
-      <thead><tr><th>Позиция</th><th style="text-align:right;min-width:120px">Сумма</th></tr></thead>
-      <tbody>
-        <tr class="grp-header"><td colspan="2">Оборудование и материалы</td></tr>
-        ${rows(matLines)}
-        <tr class="total-row"><td>Итого материалы</td><td class="amount">${fmt(cost.matTotal)}</td></tr>
-        <tr class="grp-header"><td colspan="2">Работы и логистика</td></tr>
-        ${rows(svcLines)}
-        <tr class="total-row"><td>Итого работы${cost.discountAmt > 0 ? ` (скидка ${S.discount}%)` : ''}</td><td class="amount">${fmt(cost.svcTotal)}</td></tr>
-        <tr class="grand-row"><td>ИТОГО К ОПЛАТЕ</td><td class="amount">${fmt(cost.total)}</td></tr>
-        <tr class="sqm-row"><td>Стоимость «под ключ» за 1 м²</td><td class="amount">${fmt(cost.perSqm)} / м²</td></tr>
-      </tbody>
-    </table>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.7">
-      * Цены ориентировочные. Итоговая стоимость уточняется после замера и согласования технического задания.<br>
-      * Стоимость электромонтажных работ в смету не включена.<br>
-      * Гарантия на оборудование уточняется у производителя.
-    </div>`;
+    det.innerHTML = `
+        <div><b>Тип:</b> ${c.type}</div>
+        <div><b>Емкость:</b> ${(c.maxPixels/1e6).toFixed(1)}M пикс.</div>
+    `;
+    card.classList.add('show');
+    refreshAll();
 }
 
 function refreshAll() {
-  readState();
-  updatePitchAdvice();
-  const tech = calcTech();
-  const cost = tech ? calcCost(tech) : null;
-  renderTech(tech);
-  renderEst(cost);
+    readState();
+    updatePitchAdvice();
+    const tech = calcTech();
+    renderTech(tech);
+    renderEst(tech ? calcCost(tech) : null);
+}
+
+function updatePitchAdvice() {
+    const el = document.getElementById('pitchAdvice');
+    const matrix = DB.matrices.find(m => m.id === S.matrixId);
+    if (!S.viewDist) { el.innerHTML = ''; return; }
+
+    const recPitch = S.viewDist; // Simple rule: 1m distance = P1
+    if (!matrix) {
+        el.innerHTML = `<div class="pitch-advice pitch-ok">Для ${S.viewDist}м рекомендуется шаг ≤ P${recPitch}</div>`;
+        return;
+    }
+
+    const ok = matrix.pitch <= recPitch;
+    el.innerHTML = ok
+        ? `<div class="pitch-advice pitch-ok">✓ Шаг P${matrix.pitch} отлично подходит для ${S.viewDist}м</div>`
+        : `<div class="pitch-advice pitch-bad">✗ Шаг P${matrix.pitch} великоват. Лучше ≤ P${recPitch}</div>`;
+}
+
+function calcTech() {
+    const m = DB.matrices.find(x => x.id === S.matrixId);
+    if (!m || !S.screenW || !S.screenH) return null;
+
+    const cols = Math.max(1, Math.round(S.screenW / m.moduleW));
+    const rows = Math.max(1, Math.round(S.screenH / m.moduleH));
+    const totalModulesSide = cols * rows;
+    const realW = cols * m.moduleW;
+    const realH = rows * m.moduleH;
+
+    const pixW = Math.round(realW / m.pitch);
+    const pixH = Math.round(realH / m.pitch);
+    const totalPixelsSide = pixW * pixH;
+
+    const maxPowerSide = totalModulesSide * m.maxPowerPerModule;
+    const psu = DB.prices.psu;
+    const psusSide = Math.ceil(maxPowerSide / (psu.watts * psu.usageFactor));
+
+    // Cards: 1 per 16 modules
+    const cardsSide = Math.ceil(totalModulesSide / 16);
+
+    const side = S.assemblySide;
+
+    return {
+        realW, realH, cols, rows, totalModulesSide,
+        totalPixelsSide,
+        maxW: maxPowerSide * side,
+        neededPSUs: psusSide * side,
+        neededCards: cardsSide * side,
+        modulesTotal: totalModulesSide * side,
+        voltage: m.voltage,
+        voltageMatch: m.voltage === psu.voltage
+    };
+}
+
+function calcCost(tech) {
+    const m = DB.matrices.find(x => x.id === S.matrixId);
+    const c = DB.controllers.find(x => x.id === S.ctrlId);
+    const rate = DB.config.usdRate;
+    const markupMat = 1 + DB.config.markupMaterials / 100;
+
+    // Unit based prices (Internal USD -> Customer Current Currency)
+    const getPrice = (usd) => (usd * getRate() * (S.currency === 'USD' ? 1 : 1)) * markupMat;
+
+    // 1. Materials
+    const modulesCost = tech.modulesTotal * getPrice(m.priceUSD);
+    const psuCost     = tech.neededPSUs * getPrice(DB.prices.psu.priceUSD);
+    const cardsCost   = tech.neededCards * getPrice(DB.prices.receivingCard.priceUSD);
+    const cablesCost  = tech.modulesTotal * (getPrice(DB.prices.cables.dataRibbonUSD) + getPrice(DB.prices.cables.powerUSD));
+    const ctrlCost    = c ? getPrice(c.priceUSD) : 0;
+
+    const matSubtotal = modulesCost + psuCost + cardsCost + cablesCost + ctrlCost;
+
+    // 2. Labor (UAH -> Current Currency)
+    const toCurr = (uah) => S.currency === 'USD' ? uah / rate : uah;
+    const laborMarkup = 1 + DB.config.markupLabor / 100;
+
+    const frame    = toCurr(S.frameFixed) * laborMarkup;
+    const install  = toCurr(S.installFixed) * laborMarkup;
+    const delivery = toCurr(S.delivery) * laborMarkup;
+    const comm     = toCurr(S.commissioning) * laborMarkup;
+
+    const laborSubtotal = frame + install + delivery + comm;
+    const discountAmt = laborSubtotal * (S.discount / 100);
+    const laborFinal = laborSubtotal - discountAmt;
+
+    return {
+        total: matSubtotal + laborFinal,
+        matSubtotal, laborSubtotal, laborFinal, discountAmt,
+        lines: [
+            { label: `Модули ${m.model} (${tech.modulesTotal} шт)`, val: modulesCost },
+            { label: `Блоки питания (${tech.neededPSUs} шт)`, val: psuCost },
+            { label: `Приемные карты (${tech.neededCards} шт)`, val: cardsCost },
+            { label: `Комплект кабелей (${tech.modulesTotal} шт)`, val: cablesCost },
+            { label: `Контроллер ${c ? c.model : '—'}`, val: ctrlCost },
+            { label: 'Конструктив и монтаж', val: frame + install },
+            { label: 'Логистика и запуск', val: delivery + comm }
+        ]
+    };
+}
+
+function renderTech(tech) {
+    const el = document.getElementById('techBlock');
+    if (!tech) return;
+
+    el.innerHTML = `
+        <div class="tech-grid">
+            <div class="tech-chip"><div class="tv">${tech.realW/1000}×${tech.realH/1000}</div><div class="tk">Размер (м)</div></div>
+            <div class="tech-chip"><div class="tv">${tech.cols}×${tech.rows}</div><div class="tk">Модулей (стор)</div></div>
+            <div class="tech-chip"><div class="tv">${tech.modulesTotal}</div><div class="tk">Всего модулей</div></div>
+            <div class="tech-chip"><div class="tv">${tech.neededCards}</div><div class="tk">Приемных карт</div></div>
+            <div class="tech-chip"><div class="tv">${tech.neededPSUs}</div><div class="tk">Блоков питания</div></div>
+            <div class="tech-chip"><div class="tv">${Math.round(tech.maxW)}Вт</div><div class="tk">Макс. мощность</div></div>
+        </div>
+        ${!tech.voltageMatch ? '<div class="pitch-advice pitch-bad" style="margin-top:15px">⚠ Внимание: Вольтаж модуля ('+tech.voltage+'V) не совпадает с БП!</div>' : ''}
+    `;
+}
+
+function renderEst(cost) {
+    const el = document.getElementById('estBlock');
+    if (!cost) return;
+
+    el.innerHTML = `
+        <table class="est-table">
+            <tr class="grp-header"><td colspan="2">Оборудование</td></tr>
+            ${cost.lines.slice(0, 5).map(l => `<tr><td>${l.label}</td><td class="amount">${fmt(l.val)}</td></tr>`).join('')}
+            <tr class="grp-header"><td colspan="2">Работы и услуги</td></tr>
+            ${cost.lines.slice(5).map(l => `<tr><td>${l.label}</td><td class="amount">${fmt(l.val)}</td></tr>`).join('')}
+            ${cost.discountAmt > 0 ? `<tr style="color:var(--danger)"><td>Скидка на работы (${S.discount}%)</td><td class="amount">-${fmt(cost.discountAmt)}</td></tr>` : ''}
+            <tr class="grand-row"><td>ИТОГО</td><td class="amount">${fmt(cost.total)}</td></tr>
+        </table>
+    `;
 }
