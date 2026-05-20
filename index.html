@@ -1,269 +1,486 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LED База знаний</title>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-
-<!-- HEADER -->
+<link href="css/main.css" rel="stylesheet">
+<link href="css/wiki.css" rel="stylesheet">
+</head><body>
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>LED База знаний</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><link href="css/main.css" rel="stylesheet">
+<link href="css/wiki.css" rel="stylesheet">
+</head><body>
 <header class="header">
-  <div class="logo">
-    <div class="logo-dot"></div>
-    LED база знаний
-  </div>
+  <div class="logo"><div class="logo-dot"></div>LED База знаний</div>
   <div class="search-wrap">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="globalSearch" placeholder="Поиск по справочнику…">
+    <input type="text" id="globalSearch" placeholder="Поиск по справочнику…" oninput="window.doSearch && window.doSearch(this.value)">
   </div>
-  <button class="print-btn">
+  <button class="print-btn" onclick="window.print()">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
     Печать
   </button>
 </header>
-
-<!-- NAV -->
 <nav class="nav-bar">
-  <button class="tab-btn active" data-tab="kb">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>База знаний
+  <button class="tab-btn active" data-tab="knowledge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    База знаний
   </button>
   <button class="tab-btn" data-tab="calc">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>Калькулятор
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+    Калькулятор
   </button>
-  <button class="tab-btn" data-tab="setup">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Инструкция
+  <button class="tab-btn" data-tab="guide">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Инструкция настройки
   </button>
 </nav>
-
 <main class="main" id="mainContent">
-
-<!-- ===================== KNOWLEDGE BASE ===================== -->
-<section class="section active" id="tab-kb">
-  <div class="page-title">Справочник технологий LED</div>
-
-  <!-- 1. General Info & Stats -->
-  <div class="section-title"><div class="ic"></div>Обзор технологии</div>
-  <div class="stat-row">
-    <div class="stat-chip"><span class="sv">100 000</span><span class="sk">Часов работы</span></div>
-    <div class="stat-chip"><span class="sv">P0.9–P20</span><span class="sk">Шаг пикселя</span></div>
-    <div class="stat-chip"><span class="sv">800–10 000</span><span class="sk">Нит яркость</span></div>
-    <div class="stat-chip"><span class="sv">3840 Hz</span><span class="sk">Частота PWM</span></div>
-  </div>
-  <div class="grid-3" style="margin-bottom:30px">
-    <div class="card card-accent">
-      <h4>Устройство матрицы</h4>
-      <p>LED-экран — это массив модулей, каждый из которых содержит пикселы (RGB-кластеры). Управление яркостью идет через ШИМ (PWM). Чем выше частота, тем стабильнее картинка на камеру.</p>
-    </div>
-    <div class="card card-accent">
-      <h4>Шаг пикселя (Pitch)</h4>
-      <p>Расстояние между центрами диодов в мм. P2.5 = 2.5 мм. Напрямую влияет на разрешение и минимальную дистанцию просмотра.</p>
-    </div>
-    <div class="card card-accent">
-      <h4>Яркость (Nits)</h4>
-      <p>Измеряется в кд/м². Интерьер: 800–1500 нит. Улица: ≥5000 нит (чтобы «перебить» солнце).</p>
-    </div>
-  </div>
-
-  <!-- 2. Interactive Controllers Table -->
-  <div class="section-title"><div class="ic"></div>Интерактивный подбор контроллеров</div>
-  <div class="card" style="margin-bottom:30px; padding: 15px;">
-    <div class="ctrl-toolbar" id="ctrlToolbar" style="box-shadow:none; border:none; padding:0; margin-bottom:15px;">
-      <div class="ctrl-search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="ctrlSearch" placeholder="Поиск модели…">
+<!-- KNOWLEDGE BASE -->
+<section class="section active" id="tab-knowledge">
+  <div class="wiki-layout">
+    <aside class="wiki-sidebar" id="wikiSidebar"></aside>
+    <div class="wiki-content">
+      <div id="wikiContentArea"></div>
+      <div class="wiki-pagination">
+        <button class="wiki-btn hidden" id="wikiPrevBtn"></button>
+        <button class="wiki-btn hidden" id="wikiNextBtn"></button>
       </div>
-      <select id="fManufacturer"><option value="">Все бренды</option><option>Novastar</option><option>Colorlight</option><option>Huidu</option></select>
-      <button class="toggle-chip" id="togHDR">HDR</button>
-      <button class="toggle-chip" id="togCloud">Cloud</button>
-      <button class="reset-btn">✕ Сбросить</button>
     </div>
-    <div class="ctrl-table-wrap">
-      <table class="ctrl-table" id="ctrlTable">
-        <thead id="ctrlHead"></thead>
-        <tbody id="ctrlBody"></tbody>
+  </div>
+</section>
+
+<!-- CALCULATOR TAB -->
+<section class="section" id="tab-calc">
+  <div class="page-title" style="margin-bottom: 24px;">Смета и расчет проекта</div>
+  
+  <div class="calc-wizard">
+    <!-- Блок 1: Исходные данные -->
+    <div class="wizard-step">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <div class="step-title">Параметры и габариты</div>
+      </div>
+      <div class="step-body">
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Среда использования</label>
+            <select id="w_env" onchange="window.updateCalc()">
+              <option value="indoor">Внутренний (Indoor)</option>
+              <option value="outdoor">Уличный (Outdoor)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Желаемая ширина (м)</label>
+            <input type="number" id="w_width" value="3.0" step="0.1" min="0.1" oninput="window.updateCalc()">
+          </div>
+          <div class="form-group">
+            <label>Желаемая высота (м)</label>
+            <input type="number" id="w_height" value="2.0" step="0.1" min="0.1" oninput="window.updateCalc()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блок 2: Оборудование -->
+    <div class="wizard-step">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div class="step-title">Выбор комплектующих</div>
+      </div>
+      <div class="step-body">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Модуль LED</label>
+            <select id="w_mod" onchange="window.updateCalc()"></select>
+            <div id="w_mod_hints" class="hint-box"></div>
+          </div>
+          <div class="form-group">
+            <label>Контроллер управления</label>
+            <select id="w_ctrl" onchange="window.updateCalc()"></select>
+            <div id="w_ctrl_hints" class="hint-box"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блок 3: Услуги и Наценки -->
+    <div class="wizard-step">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <div class="step-title">Услуги и экономика</div>
+      </div>
+      <div class="step-body">
+        <div class="form-row-4">
+          <div class="form-group">
+            <label>Каркас (UAH)</label>
+            <input type="number" id="w_frame" value="12000" min="0" oninput="window.updateCalc()">
+          </div>
+          <div class="form-group">
+            <label>Доставка (UAH)</label>
+            <input type="number" id="w_delivery" value="1500" min="0" oninput="window.updateCalc()">
+          </div>
+          <div class="form-group">
+            <label>Монтаж / ПНР (UAH)</label>
+            <input type="number" id="w_setup" value="10000" min="0" oninput="window.updateCalc()">
+          </div>
+          <div class="form-group">
+            <label>Скидка на ПНР (UAH)</label>
+            <input type="number" id="w_discount" value="0" min="0" oninput="window.updateCalc()">
+          </div>
+        </div>
+        <div class="form-row-2" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px;">
+          <div class="form-group">
+            <label>Наценка на материалы (%)</label>
+            <input type="number" id="w_markup_mat" value="25" min="0" max="200" oninput="window.updateCalc()">
+          </div>
+          <div class="form-group">
+            <label>Курс USD (UAH)</label>
+            <input type="number" id="w_usd_rate" value="41.2" step="0.1" oninput="window.updateCalc()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блок 4: Итоговая смета (Receipt) -->
+    <div class="wizard-receipt">
+      <div class="receipt-header">Спецификация и расчет стоимости</div>
+      
+      <!-- Tech bar -->
+      <div class="tech-bar">
+        <div class="tech-item"><div class="tl">Размер (мм)</div><div class="tv" id="r_size">—</div></div>
+        <div class="tech-item"><div class="tl">Матрица мод.</div><div class="tv" id="r_matrix">—</div></div>
+        <div class="tech-item"><div class="tl">Разрешение</div><div class="tv" id="r_res">—</div></div>
+        <div class="tech-item"><div class="tl">Пикселей</div><div class="tv" id="r_px">—</div></div>
+        <div class="tech-item"><div class="tl">P_Max / P_Avg</div><div class="tv" id="r_power">—</div></div>
+      </div>
+
+      <table class="receipt-table">
+        <thead>
+          <tr>
+            <th>Наименование</th>
+            <th class="text-center">Кол-во</th>
+            <th class="text-right">Цена (UAH)</th>
+            <th class="text-right">Сумма (UAH)</th>
+          </tr>
+        </thead>
+        <tbody id="receipt_body"></tbody>
+        <tfoot>
+          <tr class="receipt-total">
+            <td colspan="3">ИТОГО К ОПЛАТЕ:</td>
+            <td class="text-right" id="receipt_total">0 ₴</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
-    <div id="glossaryLegend" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:15px;"></div>
-  </div>
 
-  <!-- 3. Comparison & Technical Details -->
-  <div class="section-title"><div class="ic"></div>Сравнение решений и компонентов</div>
-  <div class="grid-2" style="margin-bottom:30px">
-    <div class="card">
-      <h4>Золотая нить vs Медная</h4>
-      <p>В премиум-диодах используется <b>золото (Au)</b> — оно не окисляется. В бюджете <b>медь (Cu)</b> — дешевле, но срок службы на улице в 2 раза меньше.</p>
-      <div class="info-box info-orange" style="margin-top:10px">Для Outdoor проектов — только золото.</div>
-    </div>
-    <div class="card">
-      <h4>SMD vs COB / GOB</h4>
-      <p>SMD — классика, легко чинить. COB — кристаллы под слоем смолы, не боятся влаги и ударов, но почти неремонтопригодны.</p>
-    </div>
-  </div>
-
-  <div class="table-wrap" style="margin-bottom:30px">
-    <table>
-      <thead><tr><th>Задача</th><th>Рекомендуемый шаг</th><th>Тип защиты</th><th>Управление</th></tr></thead>
-      <tbody>
-        <tr><td class="td-key">Билборд на трассе</td><td>P6–P10</td><td>IP65 (Outdoor)</td><td>4G / Cloud</td></tr>
-        <tr><td class="td-key">Конференц-зал</td><td>P1.5–P2.5</td><td>IP30 (Indoor)</td><td>Local (HDMI)</td></tr>
-        <tr><td class="td-key">Витрина магазина</td><td>P2.5–P3.9</td><td>IP40 (High Brt)</td><td>Wi-Fi / Cloud</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- 4. Troubleshooting & Lifespan -->
-  <div class="section-title"><div class="ic"></div>Эксплуатация и сервис</div>
-  <div class="grid-2">
-    <div class="card card-warn">
-      <h4>Основные неисправности</h4>
-      <p>• <b>Черный экран</b>: Блок питания или контроллер.<br>• <b>Битые пиксели</b>: Механика или деградация.<br>• <b>Полосы</b>: Проблемы со шлейфом данных.</p>
-    </div>
-    <div class="card">
-      <h4>Факторы износа</h4>
-      <p>Главный враг — <b>перегрев</b>. Повышение температуры на 10°C выше нормы снижает ресурс диодов в 2 раза.</p>
-    </div>
   </div>
 </section>
 
-<!-- ===================== ESTIMATE CALCULATOR ===================== -->
-<section class="section" id="tab-calc">
-  <div class="page-title">Расчет стоимости и спецификации</div>
+<!-- CSS for Wizard -->
+<style>
+.calc-wizard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 32px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 32px;
+}
+.wizard-step { display: flex; flex-direction: column; gap: 16px; }
+.step-header { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid var(--bg2); padding-bottom: 8px; }
+.step-num { 
+  background: var(--accent); color: #fff; width: 28px; height: 28px; 
+  display: flex; align-items: center; justify-content: center; 
+  border-radius: 50%; font-weight: 700; font-size: 14px;
+}
+.step-title { font-size: 18px; font-weight: 700; color: var(--text); }
+.step-body { padding-left: 40px; }
 
-  <div class="block">
-    <div class="block-header">
-      <div class="block-num">1</div>
-      <div class="block-title">Параметры проекта</div>
-    </div>
-    <div class="block-body">
-      <div class="form-grid" style="margin-bottom:20px">
-        <div class="form-group" style="grid-column:span 2">
-          <label>Название проекта</label>
-          <input type="text" id="projectName" placeholder="Клиент / Объект">
-        </div>
-        <div class="form-group">
-          <label>Валюта отображения</label>
-          <select id="currency">
-            <option value="UAH" selected>₴ UAH (Гривна)</option>
-            <option value="USD">$ USD (Доллар)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Тип сборки</label>
-          <select id="assemblySide">
-            <option value="1">Односторонняя</option>
-            <option value="2">Двухсторонняя (×2)</option>
-          </select>
-        </div>
-      </div>
+.form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.form-row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.form-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 768px) {
+  .form-row-3, .form-row-2, .form-row-4 { grid-template-columns: 1fr; }
+  .step-body { padding-left: 0; margin-top: 12px; }
+}
 
-      <div class="sect">Габариты и размещение</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Место установки</label>
-          <select id="location">
-            <option value="">— выберите —</option>
-            <option value="indoor">🏢 Интерьер (Indoor)</option>
-            <option value="outdoor">🌤 Улица (Outdoor)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Желаемая ширина (мм)</label>
-          <input type="number" id="screenW" placeholder="Напр. 3000">
-        </div>
-        <div class="form-group">
-          <label>Желаемая высота (мм)</label>
-          <input type="number" id="screenH" placeholder="Напр. 2000">
-        </div>
-        <div class="form-group">
-          <label>Дистанция просмотра (м)</label>
-          <select id="viewDist">
-            <option value="">— выберите —</option>
-            <option value="2">2 м</option>
-            <option value="4">4 м</option>
-            <option value="6">6 м</option>
-            <option value="10">10 м</option>
-          </select>
-        </div>
-      </div>
-      <div id="pitchAdvice"></div>
+.hint-box { margin-top: 8px; font-size: 13px; color: var(--text3); background: var(--bg2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); }
 
-      <div class="divider"></div>
-      <div class="sect">Комплектующие</div>
-      <div class="grid-2">
-        <div class="form-group comp-select-wrap">
-          <label>Дисплейный модуль (Матрица)</label>
-          <select id="matrixSel"><option value="">— выберите место установки —</option></select>
-          <div class="comp-card" id="matrixCard"><div class="comp-card-grid" id="matrixDetails"></div></div>
-        </div>
-        <div class="form-group comp-select-wrap">
-          <label>Медиаплеер / Контроллер</label>
-          <select id="ctrlSel"><option value="">— выберите место установки —</option></select>
-          <div class="comp-card" id="ctrlCard"><div class="comp-card-grid" id="ctrlDetails"></div></div>
-        </div>
-      </div>
+/* Receipt Section */
+.wizard-receipt {
+  margin-top: 16px; background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 12px; padding: 24px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+.receipt-header { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-      <div class="divider"></div>
-      <div class="sect">Доп. расходы (ФИКС)</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Каркас (грн)</label><input type="number" id="frameFixed"></div>
-        <div class="form-group"><label>Монтаж (грн)</label><input type="number" id="installFixed"></div>
-        <div class="form-group"><label>Доставка (грн)</label><input type="number" id="delivery"></div>
-        <div class="form-group"><label>Пусконаладка (грн)</label><input type="number" id="commissioning"></div>
-        <div class="form-group"><label>Скидка на работы (%)</label><input type="number" id="discount" value="0"></div>
-      </div>
-    </div>
-  </div>
+.tech-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;
+}
+.tech-item { flex: 1; min-width: 120px; }
+.tl { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+.tv { font-size: 15px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #0ea5e9; }
 
-  <!-- BLOCK 2: TECH -->
-  <div class="block">
-    <div class="block-header" style="background:var(--accent); color:#fff">
-      <div class="block-num" style="background:#fff; color:var(--accent)">2</div>
-      <div class="block-title" style="color:#fff">Техническая спецификация (Точная)</div>
-    </div>
-    <div class="block-body" id="techBlock">
-      <div class="placeholder">Настройте параметры экрана для формирования ТЗ</div>
-    </div>
-  </div>
+.receipt-table { width: 100%; border-collapse: collapse; }
+.receipt-table th, .receipt-table td { padding: 12px 8px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; }
+.receipt-table th { color: #64748b; text-transform: uppercase; font-size: 11px; text-align: left; font-weight: 600; }
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+.receipt-total td { font-weight: 800; font-size: 18px; color: #0f172a; border-top: 2px solid #cbd5e1; border-bottom: none; padding-top: 16px; }
+#receipt_total { color: #059669; font-size: 22px; }
+.ri-name { font-weight: 600; color: #0f172a; display: block; }
+.ri-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+</style>
 
-  <!-- BLOCK 3: ESTIMATE -->
-  <div class="block">
-    <div class="block-header">
-      <div class="block-num">3</div>
-      <div class="block-title">Смета для клиента</div>
-    </div>
-    <div class="block-body" id="estBlock">
-      <div class="placeholder">Выберите компоненты для расчета стоимости</div>
-    </div>
-  </div>
-</section>
+<script type="module">
+import { DB } from './js/data/database.js';
 
-<!-- ===================== SETUP INSTRUCTIONS ===================== -->
-<section class="section" id="tab-setup">
-  <div class="page-title">Инструкция по настройке</div>
-  <div class="grid-2">
-    <div class="card card-accent">
-      <h4>1. Подключение питания</h4>
-      <p>Проверьте полярность (+5V и GND). Используйте кабель сечением не менее 1.5мм² на каждые 40А нагрузки.</p>
-    </div>
-    <div class="card card-accent">
-      <h4>2. Сигнальная сеть</h4>
-      <p>Плеер → Карта 1 → Карта 2 (Snake pattern). Максимальная длина витой пары — 100м.</p>
-    </div>
-  </div>
-  <div class="card" style="margin-top:20px">
-    <h4>3. Программная настройка</h4>
-    <p>Используйте <b>NovaLCT</b> или <b>PlayerMaster</b>. Загрузите файл конфигурации .rcfgx / .rcfg и настройте Screen Mapping.</p>
+let currentEnv = 'indoor';
+
+function init() {
+  // Set default values from DB
+  document.getElementById('w_usd_rate').value = DB.config.usdRate;
+  document.getElementById('w_markup_mat').value = DB.config.markupMaterials;
+  document.getElementById('w_frame').value = DB.prices.fixedCosts.frameUAH;
+  document.getElementById('w_delivery').value = DB.prices.fixedCosts.deliveryUAH;
+  document.getElementById('w_setup').value = DB.prices.fixedCosts.commissioningUAH + DB.prices.fixedCosts.installUAH;
+  
+  updateLists();
+  window.updateCalc = updateCalc; // Expose to global for onchange
+}
+
+function updateLists() {
+  currentEnv = document.getElementById('w_env').value;
+  
+  // Update Modules
+  const modSelect = document.getElementById('w_mod');
+  const prevMod = modSelect.value;
+  modSelect.innerHTML = '';
+  DB.matrices.filter(m => m.location === currentEnv).forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = `${m.model} (${m.moduleW}x${m.moduleH}mm) - $${m.priceUSD}`;
+    modSelect.appendChild(opt);
+  });
+  if (prevMod && [...modSelect.options].some(o => o.value === prevMod)) {
+    modSelect.value = prevMod;
+  }
+  
+  // Update Controllers
+  const ctrlSelect = document.getElementById('w_ctrl');
+  const prevCtrl = ctrlSelect.value;
+  ctrlSelect.innerHTML = '';
+  DB.controllers.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.manufacturer} ${c.model} (до ${(c.maxPixels/1000000).toFixed(1)}M px)`;
+    ctrlSelect.appendChild(opt);
+  });
+  if (prevCtrl && [...ctrlSelect.options].some(o => o.value === prevCtrl)) {
+    ctrlSelect.value = prevCtrl;
+  }
+  
+  updateCalc();
+}
+
+function updateCalc() {
+  // Check if env changed
+  const newEnv = document.getElementById('w_env').value;
+  if (newEnv !== currentEnv) {
+    updateLists();
+    return;
+  }
+
+  const modId = document.getElementById('w_mod').value;
+  const ctrlId = document.getElementById('w_ctrl').value;
+  const mod = DB.matrices.find(m => m.id === modId);
+  const ctrl = DB.controllers.find(c => c.id === ctrlId);
+  if (!mod || !ctrl) return;
+
+  // Render Hints
+  document.getElementById('w_mod_hints').innerHTML = `<b>Яркость:</b> ${mod.brightness} nits | <b>Защита:</b> ${mod.ip} | <b>Технология:</b> ${mod.technology}`;
+  document.getElementById('w_ctrl_hints').innerHTML = `<b>Тип:</b> ${ctrl.type} | <b>Порты:</b> ${ctrl.ethernetPorts} | <b>Облако:</b> ${ctrl.cloud ? 'Да' : 'Нет'}`;
+
+  // Inputs
+  const w_m = parseFloat(document.getElementById('w_width').value) || 0;
+  const h_m = parseFloat(document.getElementById('w_height').value) || 0;
+  const usdRate = parseFloat(document.getElementById('w_usd_rate').value) || 40.0;
+  const markup = 1 + ((parseFloat(document.getElementById('w_markup_mat').value) || 0) / 100);
+
+  // Geometry
+  const cols = Math.round((w_m * 1000) / mod.moduleW) || 1;
+  const rows = Math.round((h_m * 1000) / mod.moduleH) || 1;
+  const totalMods = cols * rows;
+  
+  const realW = cols * mod.moduleW;
+  const realH = rows * mod.moduleH;
+  
+  // Resolution per module (calculate via pitch if not provided in DB)
+  // pixel count = dimension / pitch
+  const modResW = Math.round(mod.moduleW / mod.pitch);
+  const modResH = Math.round(mod.moduleH / mod.pitch);
+  const resW = cols * modResW;
+  const resH = rows * modResH;
+  const totalPx = resW * resH;
+
+  // Power
+  const maxPwrW = totalMods * mod.maxPowerPerModule;
+  const avgPwrW = maxPwrW * 0.35; // 35% typical
+
+  // Update Tech Bar
+  document.getElementById('r_size').textContent = `${realW} × ${realH}`;
+  document.getElementById('r_matrix').textContent = `${cols}×${rows} (${totalMods}шт)`;
+  document.getElementById('r_res').textContent = `${resW} × ${resH}`;
+  document.getElementById('r_px').textContent = totalPx.toLocaleString('ru');
+  document.getElementById('r_power').textContent = `${(maxPwrW/1000).toFixed(1)} / ${(avgPwrW/1000).toFixed(1)} кВт`;
+
+  // Hardware Quantities
+  const psuW = DB.prices.psu.watts * DB.prices.psu.usageFactor;
+  const psuCount = Math.ceil(maxPwrW / psuW) || 1;
+  
+  // Cabinet size estimation for receiving cards (roughly 1 card per typical cabinet size, e.g. 640x640)
+  // We'll estimate 1 card per cabinet area or just 1 per X modules.
+  const modsPerCabW = Math.round(mod.cabinetW / mod.moduleW) || 1;
+  const modsPerCabH = Math.round(mod.cabinetH / mod.moduleH) || 1;
+  const modsPerCab = modsPerCabW * modsPerCabH;
+  const rCardCount = Math.ceil(totalMods / modsPerCab) || 1;
+  
+  const dataCableCount = totalMods;
+  const pwrCableCount = Math.ceil(totalMods / 2);
+
+  // Prices UAH with markup
+  const toUAH = (usd) => (usd * usdRate * markup);
+  const pMod = toUAH(mod.priceUSD);
+  const pPsu = toUAH(DB.prices.psu.priceUSD);
+  const pRCard = toUAH(DB.prices.receivingCard.priceUSD);
+  const pCtrl = toUAH(ctrl.priceUSD);
+  const pData = toUAH(DB.prices.cables.dataRibbonUSD);
+  const pPwr = toUAH(DB.prices.cables.powerUSD);
+
+  // Sums
+  const sMod = pMod * totalMods;
+  const sPsu = pPsu * psuCount;
+  const sRCard = pRCard * rCardCount;
+  const sData = pData * dataCableCount;
+  const sPwr = pPwr * pwrCableCount;
+
+  const frameUAH = (parseFloat(document.getElementById('w_frame').value) || 0) * markup;
+  const delivUAH = (parseFloat(document.getElementById('w_delivery').value) || 0) * markup;
+  const setupRaw = (parseFloat(document.getElementById('w_setup').value) || 0) * markup;
+  const discUAH = parseFloat(document.getElementById('w_discount').value) || 0;
+  const setupUAH = Math.max(0, setupRaw - discUAH);
+
+  const total = sMod + sPsu + sRCard + pCtrl + sData + sPwr + frameUAH + delivUAH + setupUAH;
+
+  // Render Table
+  let html = '';
+  function tr(name, desc, qty, price, sum) {
+    if (qty > 0 || sum > 0) {
+      html += `<tr>
+        <td><span class="ri-name">${name}</span><span class="ri-desc">${desc}</span></td>
+        <td class="text-center">${qty} шт</td>
+        <td class="text-right">${Math.round(price).toLocaleString('ru')}</td>
+        <td class="text-right"><b>${Math.round(sum).toLocaleString('ru')}</b></td>
+      </tr>`;
+    }
+  }
+
+  tr('LED Модули', `${mod.model} (${mod.moduleW}x${mod.moduleH})`, totalMods, pMod, sMod);
+  tr('Блоки питания', DB.prices.psu.label, psuCount, pPsu, sPsu);
+  tr('Принимающие карты', DB.prices.receivingCard.label, rCardCount, pRCard, sRCard);
+  tr('Шлейфы данных', 'Data ribbon', dataCableCount, pData, sData);
+  tr('Кабели питания', '5V wire', pwrCableCount, pPwr, sPwr);
+  tr('Контроллер экрана', `${ctrl.manufacturer} ${ctrl.model}`, 1, pCtrl, pCtrl);
+  
+  if (frameUAH > 0) tr('Каркас', 'Сборная металлоконструкция', 1, frameUAH, frameUAH);
+  if (delivUAH > 0) tr('Доставка', 'Транспортные услуги', 1, delivUAH, delivUAH);
+  if (setupRaw > 0) {
+    const dStr = discUAH > 0 ? ` (скидка -${discUAH} ₴)` : '';
+    tr('ПНР и Монтаж', 'Пусконаладочные работы' + dStr, 1, setupUAH, setupUAH);
+  }
+
+  document.getElementById('receipt_body').innerHTML = html;
+  document.getElementById('receipt_total').textContent = Math.round(total).toLocaleString('ru') + ' ₴';
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+<!-- GUIDE TAB -->
+<section class="section" id="tab-guide">
+  <div class="page-title">Инструкция настройки</div>
+  <div class="wip-card">
+    <div class="wip-icon">🚧</div>
+    <div class="wip-title">Раздел в разработке</div>
+    <div class="wip-desc">Здесь будет размещена подробная пошаговая инструкция по настройке контроллеров (например, Novastar NovaLCT), калибровке и пусконаладке оборудования.</div>
   </div>
 </section>
 
 </main>
 
-<!-- TOOLTIP -->
-<div id="tt"><div class="tt-inner" id="ttInner"></div></div>
+<script type="module" src="js/app.js"></script>
+<script>
 
-<script type="module" src="js/main.js"></script>
+// Calculators
+function calcResolution() {
+  const w = parseFloat(document.getElementById('c1w').value);
+  const h = parseFloat(document.getElementById('c1h').value);
+  const p = parseFloat(document.getElementById('c1p').value);
+  if (!w || !h || !p) return;
+  const pw = Math.round(w / p);
+  const ph = Math.round(h / p);
+  const total = pw * ph;
+  const dens = Math.round(total / ((w/1000) * (h/1000)));
+  const dist = (p * 1.0).toFixed(1);
+  document.getElementById('r1res').textContent = `${pw} × ${ph} px`;
+  document.getElementById('r1total').textContent = total.toLocaleString('ru') + ' пикс.';
+  document.getElementById('r1dens').textContent = dens.toLocaleString('ru') + ' пикс./м²';
+  document.getElementById('r1dist').textContent = dist + ' м';
+  document.getElementById('r1').classList.add('show');
+}
+
+function calcPower() {
+  const area = parseFloat(document.getElementById('c2area').value);
+  const type = document.getElementById('c2type').value;
+  const load = parseFloat(document.getElementById('c2load').value) / 100;
+  const map = { outdoor: 450, indoor: 300, rental: 380, fine: 500 };
+  const wpm2 = map[type];
+  const maxW = area * wpm2;
+  const workW = maxW * load;
+  const amps = (workW / 220).toFixed(1);
+  const psus = Math.ceil(workW / 300);
+  const kwh = ((workW * 12) / 1000).toFixed(1);
+  document.getElementById('r2max').textContent = Math.round(maxW).toLocaleString('ru') + ' Вт';
+  document.getElementById('r2work').textContent = Math.round(workW).toLocaleString('ru') + ' Вт';
+  document.getElementById('r2amp').textContent = amps + ' А';
+  document.getElementById('r2psu').textContent = psus + ' шт.';
+  document.getElementById('r2kwh').textContent = kwh + ' кВт·ч';
+  document.getElementById('r2').classList.add('show');
+}
+
+function calcPitch() {
+  const dist = parseFloat(document.getElementById('c3dist').value);
+  const env = document.getElementById('c3env').value;
+  const mult = { indoor: 1.0, outdoor: 1.4, stage: 0.9 };
+  const k = mult[env];
+  const rec = (dist / k).toFixed(1);
+  const max = (dist / (k * 0.7)).toFixed(1);
+  const p4k = (4000 / 3840).toFixed(2);
+  document.getElementById('r3pitch').textContent = `P${rec} мм`;
+  document.getElementById('r3max').textContent = `P${max} мм`;
+  document.getElementById('r3_4k').textContent = `P${p4k} мм`;
+  document.getElementById('r3').classList.add('show');
+}
+
+function calcCabinets() {
+  const sw = parseFloat(document.getElementById('c4sw').value);
+  const sh = parseFloat(document.getElementById('c4sh').value);
+  const cw = parseFloat(document.getElementById('c4cw').value);
+  const ch = parseFloat(document.getElementById('c4ch').value);
+  const cols = Math.round(sw / cw);
+  const rows = Math.round(sh / ch);
+  const total = cols * rows;
+  const rw = (cols * cw / 1000).toFixed(2);
+  const rh = (rows * ch / 1000).toFixed(2);
+  const area = (rw * rh).toFixed(2);
+  document.getElementById('r4cw').textContent = cols + ' шт.';
+  document.getElementById('r4ch').textContent = rows + ' шт.';
+  document.getElementById('r4total').textContent = total + ' шт.';
+  document.getElementById('r4real').textContent = `${rw} × ${rh} м`;
+  document.getElementById('r4area').textContent = area + ' м²';
+  document.getElementById('r4').classList.add('show');
+}
+</script>
 </body>
 </html>

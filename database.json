@@ -1,0 +1,123 @@
+{
+  "exchange_rate_usd": 40.50,
+  "modules": [
+    {
+      "id": "indoor_p2.5",
+      "name": "P2.5 Indoor SMD (320x160)",
+      "environment": "indoor",
+      "pitch": 2.5,
+      "width_mm": 320,
+      "height_mm": 160,
+      "res_w": 128,
+      "res_h": 64,
+      "max_power_w": 25,
+      "price_usd": 12.50,
+      "price_uah": null,
+      "view_dist": "2.5 - 10м",
+      "view_angle": "160°/140°"
+    },
+    {
+      "id": "indoor_p1.8",
+      "name": "P1.8 Indoor SMD (320x160)",
+      "environment": "indoor",
+      "pitch": 1.86,
+      "width_mm": 320,
+      "height_mm": 160,
+      "res_w": 172,
+      "res_h": 86,
+      "max_power_w": 20,
+      "price_usd": 22.00,
+      "price_uah": null,
+      "view_dist": "1.8 - 8м",
+      "view_angle": "160°/160°"
+    },
+    {
+      "id": "outdoor_p4",
+      "name": "P4 Outdoor SMD (320x160)",
+      "environment": "outdoor",
+      "pitch": 4.0,
+      "width_mm": 320,
+      "height_mm": 160,
+      "res_w": 80,
+      "res_h": 40,
+      "max_power_w": 40,
+      "price_usd": 16.50,
+      "price_uah": null,
+      "view_dist": "4.0 - 20м",
+      "view_angle": "140°/140°"
+    },
+    {
+      "id": "outdoor_p5",
+      "name": "P5 Outdoor SMD (320x160)",
+      "environment": "outdoor",
+      "pitch": 5.0,
+      "width_mm": 320,
+      "height_mm": 160,
+      "res_w": 64,
+      "res_h": 32,
+      "max_power_w": 45,
+      "price_usd": 14.00,
+      "price_uah": null,
+      "view_dist": "5.0 - 25м",
+      "view_angle": "140°/140°"
+    }
+  ],
+  "controllers": [
+    {
+      "id": "nova_tb50",
+      "name": "Novastar TB50 (Cloud/Local)",
+      "control_type": "any",
+      "max_pixels": 1300000,
+      "price_usd": 350.00,
+      "price_uah": null
+    },
+    {
+      "id": "nova_vx1000",
+      "name": "Novastar VX1000 (Local)",
+      "control_type": "local",
+      "max_pixels": 6500000,
+      "price_usd": 850.00,
+      "price_uah": null
+    },
+    {
+      "id": "huidu_hdvp210",
+      "name": "Huidu HD-VP210 (Local)",
+      "control_type": "local",
+      "max_pixels": 1300000,
+      "price_usd": 150.00,
+      "price_uah": null
+    },
+    {
+      "id": "huidu_hd_a3",
+      "name": "Huidu HD-A3 (Cloud)",
+      "control_type": "cloud",
+      "max_pixels": 650000,
+      "price_usd": 180.00,
+      "price_uah": null
+    }
+  ],
+  "components": {
+    "psu_5v60a": { 
+      "name": "Блок питания 5V 60A (300W)", 
+      "capacity_w": 300, 
+      "price_usd": 12.00,
+      "price_uah": null
+    },
+    "receiving_card": { 
+      "name": "Принимающая карта Nova/Colorlight", 
+      "max_pixels": 65536, 
+      "price_usd": 18.00,
+      "price_uah": null
+    },
+    "data_cable": { 
+      "name": "Шлейф данных (Data Cable)", 
+      "price_usd": null,
+      "price_uah": 15.00
+    },
+    "power_cable": { 
+      "name": "Кабель питания (Power Cable)", 
+      "price_usd": null,
+      "price_uah": 35.00
+    }
+  }
+}
