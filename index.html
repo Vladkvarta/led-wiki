@@ -70,11 +70,11 @@
           </div>
           <div class="form-group">
             <label data-i18n="width_label">Желаемая ширина (мм)</label>
-            <input type="number" id="w_width" value="3000" step="10" min="100" oninput="window.updateCalc()">
+            <input type="number" id="w_width" value="" step="10" min="100" placeholder="Например: 3000" oninput="window.updateCalc()">
           </div>
           <div class="form-group">
             <label data-i18n="height_label">Желаемая высота (мм)</label>
-            <input type="number" id="w_height" value="2000" step="10" min="100" oninput="window.updateCalc()">
+            <input type="number" id="w_height" value="" step="10" min="100" placeholder="Например: 2000" oninput="window.updateCalc()">
           </div>
         </div>
         <div class="form-row-1" style="margin-top: 16px;">
@@ -143,7 +143,7 @@
         <div class="form-row-2" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px;">
           <div class="form-group" style="grid-column: 1 / -1;">
             <label data-i18n="usd_label">Курс USD (UAH)</label>
-            <input type="number" id="w_usd_rate" value="41.2" step="0.1" oninput="window.updateCalc()">
+            <input type="number" id="w_usd_rate" value="" step="0.1" placeholder="41.5" oninput="window.updateCalc()">
           </div>
         </div>
       </div>
@@ -190,7 +190,7 @@
               <div class="tc-body">
                 <div class="tc-label" data-i18n="tc_matrix">Сборка экрана</div>
                 <div class="tc-val" id="r_matrix">—</div>
-                <div class="tc-sub" data-i18n="tc_matrix_sub">Матрица модулей</div>
+                <div class="tc-sub" id="r_matrix_sub" data-i18n="tc_matrix_sub">Матрица модулей</div>
               </div>
             </div>
           </div>
@@ -451,20 +451,47 @@ function updateCalc() {
   
   document.getElementById('r_power').textContent = `${(maxPwrW/1000).toFixed(1)} / ${(avgPwrW/1000).toFixed(1)} кВт`;
 
+  // Cabinet approximation
+  const modsPerCabW = Math.round(mod.cabinetW / mod.moduleW) || 1;
+  const modsPerCabH = Math.round(mod.cabinetH / mod.moduleH) || 1;
+  const cabCols = Math.ceil(cols / modsPerCabW);
+  const cabRows = Math.ceil(rows / modsPerCabH);
+  const totalCabs = cabCols * cabRows * sidesMultiplier;
+
   // Draw Matrix stats
   const elMatrix = document.getElementById('r_matrix');
   elMatrix.textContent = `${cols} × ${rows} ${isTwoSides ? '(x2) ' : ''}(${totalMods} ${t('pcs')})`;
+  
+  const elMatrixSub = document.getElementById('r_matrix_sub');
+  elMatrixSub.textContent = `~ ${totalCabs} кабинетов (${cabCols}×${cabRows})`;
+  elMatrixSub.style.color = 'var(--text)';
+  elMatrixSub.style.fontWeight = '600';
 
   // Hardware Quantities
   const psuW = psu.watts * psu.usageFactor;
   const psuCount = Math.ceil(maxPwrW / psuW) || 1;
   
-  // Cabinet size estimation for receiving cards (roughly 1 card per typical cabinet size, e.g. 640x640)
-  // We'll estimate 1 card per cabinet area or just 1 per X modules.
-  const modsPerCabW = Math.round(mod.cabinetW / mod.moduleW) || 1;
-  const modsPerCabH = Math.round(mod.cabinetH / mod.moduleH) || 1;
-  const modsPerCab = modsPerCabW * modsPerCabH;
-  const rCardCount = Math.ceil(totalMods / modsPerCab) || 1;
+  // Calculation of receiving cards by HUB ports and pixel limits
+  // (modResW and modResH are already calculated above)
+  const maxPxW = rcard.maxPxW || 256;
+  const maxPxH = rcard.maxPxH || 256;
+  const hubPorts = rcard.hubPorts || 8;
+
+  // 1 port (HUB) drives 1 row of modules. How many modules can 1 port drive without exceeding maxPxW?
+  const colsPerPort = Math.floor(maxPxW / modResW) || 1;
+  const cardsForWidth = Math.ceil(cols / colsPerPort);
+
+  // How many rows of modules can 1 card drive?
+  // It is limited by the physical number of ports (hubPorts) AND the pixel height limit (maxPxH / modResH)
+  const maxRowsByPixels = Math.floor(maxPxH / modResH) || 1;
+  const rowsPerCard = Math.min(hubPorts, maxRowsByPixels);
+  const cardsForHeight = Math.ceil(rows / rowsPerCard);
+
+  // Total cards per 1 side
+  const cardsPerSide = cardsForWidth * cardsForHeight;
+  
+  // Total cards for all sides
+  const rCardCount = cardsPerSide * sidesMultiplier;
 
   // Prices UAH with markup
   const toUAH = (usd) => (usd * usdRate * markup);
@@ -547,7 +574,7 @@ loadDB().then(() => {
 </main>
 
 <script type="module" src="js/app.js?v=2"></script>
-<script type="module" src="js/admin.js?v=2"></script>
+<script type="module" src="js/admin.js?v=5"></script>
 <script>
 
 // Calculators

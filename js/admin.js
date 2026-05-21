@@ -147,6 +147,11 @@ const UI = {
         ${inputGroupEdit('Модель', 'model')}
         ${inputGroupEdit('Цена (USD)', 'priceUSD', 'number')}
         
+        <div class="form-divider">Характеристики портов</div>
+        ${inputGroupEdit('Количество портов (HUB75)', 'hubPorts', 'number')}
+        ${inputGroupEdit('Макс. ширина (пикселей)', 'maxPxW', 'number')}
+        ${inputGroupEdit('Макс. высота (пикселей)', 'maxPxH', 'number')}
+        
         <div class="form-divider">Описание</div>
         ${inputGroupEdit('Описание (RU)', 'notes_ru')}
         ${inputGroupEdit('Описание (UK)', 'notes_uk')}
@@ -237,12 +242,13 @@ function renderWorkspace() {
       notes_ru: '', notes_uk: ''
     }));
   } else if (currentAdminTab === 'receivingCards') {
-    ws.innerHTML = UI.listView('receivingCards', 'Справочник Принимающих Карт', r => `<b>${r.model}</b> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${r.priceUSD || 0}</span>`);
-    bindListEvents('receivingCards', () => ({
-      id: 'new_rcard', model: 'Новая Принимающая Карта', priceUSD: 15,
-      notes_ru: '', notes_uk: ''
-    }));
-  }
+      ws.innerHTML = UI.listView('receivingCards', 'Справочник Принимающих Карт', r => `<b>${r.model}</b> <span style="color:var(--text3)">(${r.hubPorts} ports)</span> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${r.priceUSD || 0}</span>`);
+      bindListEvents('receivingCards', () => ({
+        id: 'new_rcard', model: 'Новая Принимающая Карта', priceUSD: 15,
+        hubPorts: 16, maxPxW: 256, maxPxH: 256,
+        notes_ru: '', notes_uk: ''
+      }));
+    }
 }
 
 function bindSettingsEvents() {
@@ -337,6 +343,14 @@ export async function initAdmin() {
   document.querySelector('.tab-btn[data-tab="admin"]').addEventListener('click', () => {
     const container = document.getElementById('admin-app');
     if (!container.innerHTML.trim()) {
+      const pass = prompt('Введите пароль для входа в Админку:');
+      if (pass !== 'ledwiki') {
+        alert('Неверный пароль!');
+        // Переключаем обратно на первую вкладку (Калькулятор)
+        document.querySelector('.tab-btn[data-tab="calc"]').click();
+        return;
+      }
+      
       container.innerHTML = UI.layout();
       
       // Bind Menu

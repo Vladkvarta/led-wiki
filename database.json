@@ -551,14 +551,30 @@
       "model": "NovaStar Armor A320",
       "priceUSD": 15,
       "notes_ru": "Стандартная принимающая карта 512x256",
-      "notes_uk": "Стандартна приймаюча карта 512x256"
+      "notes_uk": "Стандартна приймаюча карта 512x256",
+      "hubPorts": 12,
+      "maxPxW": 512,
+      "maxPxH": 256
     },
     {
       "id": "rc_mrv328",
       "model": "NovaStar MRV328",
       "priceUSD": 12,
       "notes_ru": "Бюджетная принимающая карта 256x256",
-      "notes_uk": "Бюджетна приймаюча карта 256x256"
+      "notes_uk": "Бюджетна приймаюча карта 256x256",
+      "hubPorts": 8,
+      "maxPxW": 256,
+      "maxPxH": 256
+    },
+    {
+      "id": "rc_5a75b",
+      "model": "Colorlight 5A-75B",
+      "priceUSD": 14,
+      "notes_ru": "Интегрированный HUB75, нагрузка до 256x256 px",
+      "notes_uk": "Інтегрований HUB75, навантаження до 256x256 px",
+      "hubPorts": 16,
+      "maxPxW": 256,
+      "maxPxH": 256
     }
   ]
 }
