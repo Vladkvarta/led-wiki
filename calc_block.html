@@ -1,0 +1,348 @@
+<!-- CALCULATOR TAB -->
+<section class="section" id="tab-calc">
+  <div class="page-title">Смета и расчет проекта</div>
+  
+  <div class="calc-grid">
+    
+    <!-- LEFT COLUMN: INPUTS -->
+    <div class="calc-col">
+      <!-- BLOCK 1: Базовые характеристики -->
+      <div class="calc-card">
+        <div class="calc-title">1. Базовые характеристики</div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Использование</label>
+            <select id="s_env" onchange="updateModuleList()">
+              <option value="indoor">Помещение (Indoor)</option>
+              <option value="outdoor">Улица (Outdoor)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Управление</label>
+            <select id="s_ctrl" onchange="updateControllerList()">
+              <option value="any">Любое</option>
+              <option value="local">Локальное (ПК/HDMI)</option>
+              <option value="cloud">Облачное (Wi-Fi/4G)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Желаемая ширина (м)</label>
+            <input type="number" id="s_w" value="3" step="0.1" min="0.1" oninput="calculateAll()">
+          </div>
+          <div class="form-group">
+            <label>Желаемая высота (м)</label>
+            <input type="number" id="s_h" value="2" step="0.1" min="0.1" oninput="calculateAll()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Выбор модуля</label>
+          <select id="s_mod" onchange="calculateAll()"></select>
+          <div class="hint-text" id="mod_hint"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Выбор контроллера</label>
+          <select id="s_controller" onchange="calculateAll()"></select>
+        </div>
+      </div>
+
+      <!-- BLOCK 2: Доп расходы -->
+      <div class="calc-card">
+        <div class="calc-title">2. Дополнительные расходы (UAH)</div>
+        
+        <div class="form-group">
+          <label>Каркас / Металлоконструкция</label>
+          <input type="number" id="s_frame_cost" value="0" min="0" oninput="calculateAll()">
+        </div>
+        
+        <div class="form-group">
+          <label>Доставка</label>
+          <input type="number" id="s_delivery_cost" value="0" min="0" oninput="calculateAll()">
+        </div>
+        
+        <div class="form-group">
+          <label>Пусконаладочные работы (ПНР)</label>
+          <input type="number" id="s_setup_cost" value="0" min="0" oninput="calculateAll()">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Скидка на ПНР (UAH)</label>
+            <input type="number" id="s_discount" value="0" min="0" oninput="calculateAll()">
+          </div>
+          <div class="form-group">
+            <label>Скрытая наценка (%)</label>
+            <input type="number" id="s_markup" value="10" min="0" max="100" oninput="calculateAll()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: OUTPUTS -->
+    <div class="calc-col">
+      <!-- BLOCK 3: Технические характеристики -->
+      <div class="calc-card result-card">
+        <div class="calc-title">3. Итоговые технические параметры</div>
+        
+        <div class="res-grid">
+          <div class="res-item">
+            <div class="res-label">Размер в модулях (Ш×В)</div>
+            <div class="res-val" id="r_mod_matrix">—</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">Реальный размер экрана (м)</div>
+            <div class="res-val" id="r_real_size">—</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">Разрешение экрана (px)</div>
+            <div class="res-val" id="r_resolution">—</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">Всего пикселей</div>
+            <div class="res-val" id="r_total_px">—</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">Макс. потребление (кВт)</div>
+            <div class="res-val" id="r_max_kw">—</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">Среднее потребление (кВт)</div>
+            <div class="res-val" id="r_avg_kw">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCK 4: Смета -->
+      <div class="calc-card result-card">
+        <div class="calc-title">4. Экономическая смета (UAH)</div>
+        <div class="hint-text" id="rate_hint" style="margin-top:-10px; margin-bottom:15px;">Курс: 1 USD = 0 UAH</div>
+        
+        <table class="smeta-table">
+          <thead>
+            <tr>
+              <th>Наименование</th>
+              <th>Кол-во</th>
+              <th class="text-right">Сумма (UAH)</th>
+            </tr>
+          </thead>
+          <tbody id="smeta_body">
+            <!-- Filled by JS -->
+          </tbody>
+          <tfoot>
+            <tr class="tfoot-total">
+              <td colspan="2">ИТОГО К ОПЛАТЕ:</td>
+              <td class="text-right" id="r_total_cost">0 ₴</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<!-- Additional CSS for new Calculator -->
+<style>
+.calc-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .calc-grid { grid-template-columns: 1fr; } }
+.calc-col { display: flex; flex-direction: column; gap: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hint-text { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
+.res-item { background: var(--bg2); padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+.res-label { font-size: 11px; text-transform: uppercase; color: var(--text3); font-weight: 600; margin-bottom: 4px; }
+.res-val { font-size: 16px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); }
+.smeta-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.smeta-table th, .smeta-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.smeta-table th { color: var(--text3); text-transform: uppercase; font-size: 11px; text-align: left; }
+.text-right { text-align: right !important; }
+.tfoot-total td { font-weight: 700; font-size: 15px; color: var(--text); border-top: 2px solid var(--accent); border-bottom: none; padding-top: 14px; }
+#r_total_cost { color: var(--good); font-size: 18px; }
+.item-name { font-weight: 600; color: var(--text); display: block; }
+.item-desc { font-size: 11px; color: var(--text3); }
+</style>
+
+<!-- Calculator Logic -->
+<script>
+let db = null;
+
+async function loadDB() {
+  try {
+    const res = await fetch('database.json');
+    db = await res.json();
+    document.getElementById('rate_hint').textContent = `Курс: 1 USD = ${db.exchange_rate_usd.toFixed(2)} ₴`;
+    updateModuleList();
+    updateControllerList();
+    calculateAll();
+  } catch (e) {
+    console.error("Failed to load database.json", e);
+  }
+}
+
+function getPriceUAH(item) {
+  if (!item) return 0;
+  if (item.price_uah !== null && item.price_uah !== undefined) {
+    return item.price_uah;
+  }
+  if (item.price_usd !== null && item.price_usd !== undefined) {
+    return item.price_usd * db.exchange_rate_usd;
+  }
+  return 0;
+}
+
+function updateModuleList() {
+  if (!db) return;
+  const env = document.getElementById('s_env').value;
+  const modSelect = document.getElementById('s_mod');
+  modSelect.innerHTML = '';
+  
+  db.modules.filter(m => m.environment === env).forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    modSelect.appendChild(opt);
+  });
+  
+  calculateAll();
+}
+
+function updateControllerList() {
+  if (!db) return;
+  const ctrlType = document.getElementById('s_ctrl').value;
+  const cSelect = document.getElementById('s_controller');
+  cSelect.innerHTML = '';
+  
+  db.controllers.forEach(c => {
+    if (ctrlType === 'any' || c.control_type === 'any' || c.control_type === ctrlType) {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      cSelect.appendChild(opt);
+    }
+  });
+  
+  calculateAll();
+}
+
+function calculateAll() {
+  if (!db) return;
+  
+  // 1. Get Inputs
+  const w_m = parseFloat(document.getElementById('s_w').value) || 0;
+  const h_m = parseFloat(document.getElementById('s_h').value) || 0;
+  const modId = document.getElementById('s_mod').value;
+  const ctrlId = document.getElementById('s_controller').value;
+  
+  const frameCost = parseFloat(document.getElementById('s_frame_cost').value) || 0;
+  const delivCost = parseFloat(document.getElementById('s_delivery_cost').value) || 0;
+  const setupCost = parseFloat(document.getElementById('s_setup_cost').value) || 0;
+  const discount = parseFloat(document.getElementById('s_discount').value) || 0;
+  const markupPct = parseFloat(document.getElementById('s_markup').value) || 0;
+  const markupMult = 1 + (markupPct / 100);
+
+  const mod = db.modules.find(m => m.id === modId);
+  const ctrl = db.controllers.find(c => c.id === ctrlId);
+  if (!mod) return;
+
+  // Update hints
+  document.getElementById('mod_hint').textContent = `Мин. дистанция: ${mod.view_dist} | Углы: ${mod.view_angle}`;
+
+  // 2. Calculate Geometry
+  const cols = Math.round((w_m * 1000) / mod.width_mm) || 1;
+  const rows = Math.round((h_m * 1000) / mod.height_mm) || 1;
+  const totalMods = cols * rows;
+  
+  const realW = (cols * mod.width_mm / 1000).toFixed(3);
+  const realH = (rows * mod.height_mm / 1000).toFixed(3);
+  
+  const resW = cols * mod.res_w;
+  const resH = rows * mod.res_h;
+  const totalPx = resW * resH;
+
+  // 3. Power
+  const totalMaxPowerW = totalMods * mod.max_power_w;
+  const totalAvgPowerW = totalMaxPowerW * 0.4; // rough avg is 40%
+  const maxKw = (totalMaxPowerW / 1000).toFixed(2);
+  const avgKw = (totalAvgPowerW / 1000).toFixed(2);
+
+  // Update UI Block 3
+  document.getElementById('r_mod_matrix').textContent = `${cols} × ${rows} (${totalMods} шт)`;
+  document.getElementById('r_real_size').textContent = `${realW} × ${realH} м`;
+  document.getElementById('r_resolution').textContent = `${resW} × ${resH} px`;
+  document.getElementById('r_total_px').textContent = totalPx.toLocaleString('ru');
+  document.getElementById('r_max_kw').textContent = maxKw;
+  document.getElementById('r_avg_kw').textContent = avgKw;
+
+  // 4. Calculate Hardware Quantities
+  // PSU: 1 per X modules. 300W PSU, safe load 240W.
+  const safePsuW = db.components.psu_5v60a.capacity_w * 0.8;
+  const psuCount = Math.ceil(totalMaxPowerW / safePsuW) || 1;
+  
+  // Rec Cards: Rough estimate - 1 card per 65k pixels or physical limits
+  const rCardCount = Math.ceil(totalPx / db.components.receiving_card.max_pixels) || 1;
+  
+  // Cables: 1 data per mod, 1 power per 2 mods (rough approx)
+  const dataCableCount = totalMods;
+  const pwrCableCount = Math.ceil(totalMods / 2);
+
+  // 5. Calculate Costs (in UAH)
+  const cMod = getPriceUAH(mod) * markupMult;
+  const cPsu = getPriceUAH(db.components.psu_5v60a) * markupMult;
+  const cRCard = getPriceUAH(db.components.receiving_card) * markupMult;
+  const cCtrl = (ctrl ? getPriceUAH(ctrl) : 0) * markupMult;
+  const cData = getPriceUAH(db.components.data_cable) * markupMult;
+  const cPwr = getPriceUAH(db.components.power_cable) * markupMult;
+
+  // Flat costs with markup (except discount which applies only to setup)
+  const cFrame = frameCost * markupMult;
+  const cDeliv = delivCost * markupMult;
+  const rawSetup = setupCost * markupMult;
+  const cSetupFinal = Math.max(0, rawSetup - discount);
+
+  // Sum
+  const sumMod = cMod * totalMods;
+  const sumPsu = cPsu * psuCount;
+  const sumRCard = cRCard * rCardCount;
+  const sumData = cData * dataCableCount;
+  const sumPwr = cPwr * pwrCableCount;
+  
+  const totalSum = sumMod + sumPsu + sumRCard + cCtrl + sumData + sumPwr + cFrame + cDeliv + cSetupFinal;
+
+  // Render Smeta
+  let smetaHtml = '';
+  function addRow(name, desc, count, sum) {
+    if (count > 0 || sum > 0) {
+      smetaHtml += `<tr>
+        <td><span class="item-name">${name}</span><span class="item-desc">${desc}</span></td>
+        <td>${count} шт</td>
+        <td class="text-right">${Math.round(sum).toLocaleString('ru')} ₴</td>
+      </tr>`;
+    }
+  }
+
+  addRow('LED Модули', mod.name, totalMods, sumMod);
+  addRow('Блоки питания', db.components.psu_5v60a.name, psuCount, sumPsu);
+  addRow('Принимающие карты', db.components.receiving_card.name, rCardCount, sumRCard);
+  if (ctrl) addRow('Контроллер (Sending)', ctrl.name, 1, cCtrl);
+  addRow('Шлейфы данных', 'Data cables', dataCableCount, sumData);
+  addRow('Кабели питания', '5V cables', pwrCableCount, sumPwr);
+  
+  if (cFrame > 0) addRow('Каркас', 'Металлоконструкция', 1, cFrame);
+  if (cDeliv > 0) addRow('Доставка', 'Транспортные расходы', 1, cDeliv);
+  if (rawSetup > 0) {
+    const dStr = discount > 0 ? ` (Скидка -${discount} ₴)` : '';
+    addRow('ПНР и Монтаж', 'Услуги настройки' + dStr, 1, cSetupFinal);
+  }
+
+  document.getElementById('smeta_body').innerHTML = smetaHtml;
+  document.getElementById('r_total_cost').textContent = Math.round(totalSum).toLocaleString('ru') + ' ₴';
+}
+
+// Init when page loads
+window.addEventListener('DOMContentLoaded', loadDB);
+</script>

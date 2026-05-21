@@ -1,7 +1,6 @@
 import { initWiki } from './wiki.js';
-import { DB } from './data/database.js'; // The calculator logic will also be initialized, but we can leave it in index.html for now or move it too.
 
-document.addEventListener('DOMContentLoaded', () => {
+function bootstrapApp() {
   // 1. Initialize Tabs
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -15,4 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Initialize Wiki Layout
   initWiki();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapApp);
+} else {
+  bootstrapApp();
+}
