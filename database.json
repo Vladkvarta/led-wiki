@@ -1,39 +1,4 @@
 {
-  "config": {
-    "usdRate": 41.2,
-    "markupMaterials": 25,
-    "markupLabor": 20,
-    "defaultDiscount": 0
-  },
-  "prices": {
-    "psu": {
-      "watts": 300,
-      "voltage": 5,
-      "usageFactor": 0.8,
-      "priceUSD": 28,
-      "label_ru": "Блок питания 5V/60A 300W",
-      "label_uk": "Блок живлення 5V/60A 300W"
-    },
-    "receivingCard": {
-      "priceUSD": 16,
-      "label_ru": "Принимающая карта (MRV/A5S)",
-      "label_uk": "Приймаюча карта (MRV/A5S)"
-    },
-    "cables": {
-      "dataRibbonUSD": 1.2,
-      "powerUSD": 2.5,
-      "dataRibbon_ru": "Шлейф данных",
-      "dataRibbon_uk": "Шлейф даних",
-      "power_ru": "Кабель питания",
-      "power_uk": "Кабель живлення"
-    },
-    "fixedCosts": {
-      "frameUAH": 12000,
-      "deliveryUAH": 1500,
-      "commissioningUAH": 6000,
-      "installUAH": 10000
-    }
-  },
   "matrices": [
     {
       "id": "p15_in",
@@ -557,5 +522,43 @@
       "description": "Облачная платформа для управления контентом.",
       "importance": "Критично для сетей из нескольких экранов."
     }
-  }
+  },
+  "powerSupplies": [
+    {
+      "id": "psu_5v_60a_300w",
+      "model": "Блок питания 5V/60A",
+      "watts": 300,
+      "voltage": 5,
+      "usageFactor": 0.8,
+      "priceUSD": 28,
+      "notes_ru": "Блок питания 5V/60A 300W",
+      "notes_uk": "Блок живлення 5V/60A 300W"
+    },
+    {
+      "id": "psu_5v_40a_200w_slim",
+      "model": "Блок питания Slim 5V/40A",
+      "watts": 200,
+      "voltage": 5,
+      "usageFactor": 0.8,
+      "priceUSD": 19,
+      "notes_ru": "Тонкий БП 200W для узких кабинетов",
+      "notes_uk": "Тонкий БЖ 200W для вузьких кабінетів"
+    }
+  ],
+  "receivingCards": [
+    {
+      "id": "rc_armor320",
+      "model": "NovaStar Armor A320",
+      "priceUSD": 15,
+      "notes_ru": "Стандартная принимающая карта 512x256",
+      "notes_uk": "Стандартна приймаюча карта 512x256"
+    },
+    {
+      "id": "rc_mrv328",
+      "model": "NovaStar MRV328",
+      "priceUSD": 12,
+      "notes_ru": "Бюджетная принимающая карта 256x256",
+      "notes_uk": "Бюджетна приймаюча карта 256x256"
+    }
+  ]
 }

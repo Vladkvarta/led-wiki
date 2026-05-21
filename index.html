@@ -14,10 +14,6 @@
     <button class="lang-btn active" id="lang_ru">RU</button>
     <button class="lang-btn" id="lang_uk">UA</button>
   </div>
-  <button class="print-btn" onclick="window.print()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-    <span data-i18n="print_btn">Печать</span>
-  </button>
 </header>
 <nav class="nav-bar">
   <button class="tab-btn active" data-tab="knowledge">
@@ -101,9 +97,19 @@
             <div id="w_mod_hints" class="hint-box"></div>
           </div>
           <div class="form-group">
-            <label data-i18n="ctrl_label">Контроллер управления</label>
+            <label data-i18n="ctrl_label">Медиаплеер / Контроллер</label>
             <select id="w_ctrl" onchange="window.updateCalc()"></select>
             <div id="w_ctrl_hints" class="hint-box"></div>
+          </div>
+          <div class="form-group">
+            <label data-i18n="psu_label">Блок питания</label>
+            <select id="w_psu" onchange="window.updateCalc()"></select>
+            <div id="w_psu_hints" class="hint-box"></div>
+          </div>
+          <div class="form-group">
+            <label data-i18n="rcard_label">Принимающая карта</label>
+            <select id="w_rcard" onchange="window.updateCalc()"></select>
+            <div id="w_rcard_hints" class="hint-box"></div>
           </div>
         </div>
       </div>
@@ -119,15 +125,15 @@
         <div class="form-row-4">
           <div class="form-group">
             <label data-i18n="frame_label">Каркас (UAH)</label>
-            <input type="number" id="w_frame" value="12000" min="0" oninput="window.updateCalc()">
+            <input type="number" id="w_frame" value="0" min="0" oninput="window.updateCalc()">
           </div>
           <div class="form-group">
             <label data-i18n="delivery_label">Доставка (UAH)</label>
-            <input type="number" id="w_delivery" value="1500" min="0" oninput="window.updateCalc()">
+            <input type="number" id="w_delivery" value="0" min="0" oninput="window.updateCalc()">
           </div>
           <div class="form-group">
             <label data-i18n="setup_label">Монтаж / ПНР (UAH)</label>
-            <input type="number" id="w_setup" value="10000" min="0" oninput="window.updateCalc()">
+            <input type="number" id="w_setup" value="0" min="0" oninput="window.updateCalc()">
           </div>
           <div class="form-group">
             <label data-i18n="discount_label">Скидка на ПНР (%)</label>
@@ -135,11 +141,7 @@
           </div>
         </div>
         <div class="form-row-2" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px;">
-          <div class="form-group">
-            <label data-i18n="markup_label">Наценка на материалы (%)</label>
-            <input type="number" id="w_markup_mat" value="25" min="0" max="200" oninput="window.updateCalc()">
-          </div>
-          <div class="form-group">
+          <div class="form-group" style="grid-column: 1 / -1;">
             <label data-i18n="usd_label">Курс USD (UAH)</label>
             <input type="number" id="w_usd_rate" value="41.2" step="0.1" oninput="window.updateCalc()">
           </div>
@@ -304,12 +306,7 @@ let currentEnv = 'indoor';
 
 function init() {
   initI18n(); // Setup language
-  // Set default values from DB
-  document.getElementById('w_usd_rate').value = DB.config.usdRate;
-  document.getElementById('w_markup_mat').value = DB.config.markupMaterials;
-  document.getElementById('w_frame').value = DB.prices.fixedCosts.frameUAH;
-  document.getElementById('w_delivery').value = DB.prices.fixedCosts.deliveryUAH;
-  document.getElementById('w_setup').value = DB.prices.fixedCosts.commissioningUAH + DB.prices.fixedCosts.installUAH;
+  // Removed DB bindings for fixed costs and markup
   
   updateLists();
   window.updateCalc = updateCalc; // Expose to global for onchange
@@ -346,6 +343,33 @@ function updateLists() {
     ctrlSelect.value = prevCtrl;
   }
   
+  // Update Power Supplies
+  const psuSelect = document.getElementById('w_psu');
+  const prevPsu = psuSelect.value;
+  psuSelect.innerHTML = '';
+  DB.powerSupplies.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.model} (${p.watts}W) - $${p.priceUSD}`;
+    psuSelect.appendChild(opt);
+  });
+  if (prevPsu && [...psuSelect.options].some(o => o.value === prevPsu)) {
+    psuSelect.value = prevPsu;
+  }
+  // Update Receiving Cards
+  const rcardSelect = document.getElementById('w_rcard');
+  const prevRcard = rcardSelect.value;
+  rcardSelect.innerHTML = '';
+  DB.receivingCards.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = `${r.model} - $${r.priceUSD}`;
+    rcardSelect.appendChild(opt);
+  });
+  if (prevRcard && [...rcardSelect.options].some(o => o.value === prevRcard)) {
+    rcardSelect.value = prevRcard;
+  }
+  
   updateCalc();
 }
 
@@ -359,19 +383,25 @@ function updateCalc() {
 
   const modId = document.getElementById('w_mod').value;
   const ctrlId = document.getElementById('w_ctrl').value;
+  const psuId = document.getElementById('w_psu').value;
+  const rcardId = document.getElementById('w_rcard').value;
   const mod = DB.matrices.find(m => m.id === modId);
   const ctrl = DB.controllers.find(c => c.id === ctrlId);
-  if (!mod || !ctrl) return;
+  const psu = DB.powerSupplies.find(p => p.id === psuId);
+  const rcard = DB.receivingCards.find(r => r.id === rcardId);
+  if (!mod || !ctrl || !psu || !rcard) return;
 
   // Render Hints
   document.getElementById('w_mod_hints').innerHTML = `<b>Яркость:</b> ${mod.brightness} nits | <b>Защита:</b> ${mod.ip} | <b>Технология:</b> ${mod.technology}`;
   document.getElementById('w_ctrl_hints').innerHTML = `<b>Тип:</b> ${ctrl.type} | <b>Порты:</b> ${ctrl.ethernetPorts} | <b>Облако:</b> ${ctrl.cloud ? 'Да' : 'Нет'}`;
+  document.getElementById('w_psu_hints').innerHTML = `<b>Мощность:</b> ${psu.watts}W | <b>Запас:</b> ${psu.usageFactor * 100}% | <b>Вольтаж:</b> ${psu.voltage}V`;
+  document.getElementById('w_rcard_hints').innerHTML = `<b>Описание:</b> ${dbT(rcard, 'notes')}`;
 
   // Inputs
   const w_mm = parseFloat(document.getElementById('w_width').value) || 0;
   const h_mm = parseFloat(document.getElementById('w_height').value) || 0;
   const usdRate = parseFloat(document.getElementById('w_usd_rate').value) || 40.0;
-  const markup = 1 + ((parseFloat(document.getElementById('w_markup_mat').value) || 0) / 100);
+  const markup = 1; // Убрана общая наценка
   const isTwoSides = document.getElementById('w_two_sides').checked;
   const sidesMultiplier = isTwoSides ? 2 : 1;
 
@@ -426,7 +456,7 @@ function updateCalc() {
   elMatrix.textContent = `${cols} × ${rows} ${isTwoSides ? '(x2) ' : ''}(${totalMods} ${t('pcs')})`;
 
   // Hardware Quantities
-  const psuW = DB.prices.psu.watts * DB.prices.psu.usageFactor;
+  const psuW = psu.watts * psu.usageFactor;
   const psuCount = Math.ceil(maxPwrW / psuW) || 1;
   
   // Cabinet size estimation for receiving cards (roughly 1 card per typical cabinet size, e.g. 640x640)
@@ -435,25 +465,18 @@ function updateCalc() {
   const modsPerCabH = Math.round(mod.cabinetH / mod.moduleH) || 1;
   const modsPerCab = modsPerCabW * modsPerCabH;
   const rCardCount = Math.ceil(totalMods / modsPerCab) || 1;
-  
-  const dataCableCount = totalMods;
-  const pwrCableCount = Math.ceil(totalMods / 2);
 
   // Prices UAH with markup
   const toUAH = (usd) => (usd * usdRate * markup);
   const pMod = toUAH(mod.priceUSD);
-  const pPsu = toUAH(DB.prices.psu.priceUSD);
-  const pRCard = toUAH(DB.prices.receivingCard.priceUSD);
+  const pPsu = toUAH(psu.priceUSD);
+  const pRCard = toUAH(rcard.priceUSD);
   const pCtrl = toUAH(ctrl.priceUSD);
-  const pData = toUAH(DB.prices.cables.dataRibbonUSD);
-  const pPwr = toUAH(DB.prices.cables.powerUSD);
 
   // Sums
   const sMod = pMod * totalMods;
   const sPsu = pPsu * psuCount;
   const sRCard = pRCard * rCardCount;
-  const sData = pData * dataCableCount;
-  const sPwr = pPwr * pwrCableCount;
 
   const frameUAH = (parseFloat(document.getElementById('w_frame').value) || 0) * markup;
   const delivUAH = (parseFloat(document.getElementById('w_delivery').value) || 0) * markup;
@@ -462,7 +485,7 @@ function updateCalc() {
   const discUAH = Math.round(setupRaw * (discPercent / 100));
   const setupUAH = Math.max(0, Math.round(setupRaw - discUAH));
 
-  const total = sMod + sPsu + sRCard + pCtrl + sData + sPwr + frameUAH + delivUAH + setupUAH;
+  const total = sMod + sPsu + sRCard + pCtrl + frameUAH + delivUAH + setupUAH;
 
   // Render Table
   let html = '';
@@ -480,10 +503,8 @@ function updateCalc() {
   html += `<tr><td colspan="4" style="background:#f8fafc; padding:6px 12px; font-weight:700; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">${t('mat_title')}</td></tr>`;
   
   tr(t('mod_title'), `${mod.model} (${mod.moduleW}x${mod.moduleH})`, totalMods, pMod, sMod);
-  tr(t('psu_title'), dbT(DB.prices.psu, 'label'), psuCount, pPsu, sPsu);
-  tr(t('rcard_title'), dbT(DB.prices.receivingCard, 'label'), rCardCount, pRCard, sRCard);
-  tr(t('data_title'), dbT(DB.prices.cables, 'dataRibbon'), dataCableCount, pData, sData);
-  tr(t('pwr_title'), dbT(DB.prices.cables, 'power'), pwrCableCount, pPwr, sPwr);
+  tr(t('psu_title'), `${psu.model} — ${dbT(psu, 'notes')}`, psuCount, pPsu, sPsu);
+  tr(t('rcard_title'), `${rcard.model} — ${dbT(rcard, 'notes')}`, rCardCount, pRCard, sRCard);
   
   const ctrlDesc = `${ctrl.manufacturer} ${ctrl.model} — ${dbT(ctrl, 'bestUse')}`;
   tr(t('ctrl_title'), ctrlDesc, 1, pCtrl, pCtrl);
@@ -525,8 +546,8 @@ loadDB().then(() => {
 
 </main>
 
-<script type="module" src="js/app.js"></script>
-<script type="module" src="js/admin.js"></script>
+<script type="module" src="js/app.js?v=2"></script>
+<script type="module" src="js/admin.js?v=2"></script>
 <script>
 
 // Calculators

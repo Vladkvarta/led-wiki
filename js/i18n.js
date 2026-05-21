@@ -16,9 +16,11 @@ export const dict = {
     
     "step_2": "Выбор комплектующих",
     "mod_label": "Модуль LED",
-    "ctrl_label": "Контроллер управления",
+    "ctrl_label": "Медиаплеер / Контроллер",
+    "psu_label": "Блок питания",
+    "rcard_label": "Принимающая карта",
     
-    "step_3": "Услуги и экономика",
+    "step_3": "Дополнительные услуги",
     "frame_label": "Каркас (UAH)",
     "delivery_label": "Доставка (UAH)",
     "setup_label": "Монтаж / ПНР (UAH)",
@@ -87,9 +89,11 @@ export const dict = {
     
     "step_2": "Вибір комплектуючих",
     "mod_label": "Модуль LED",
-    "ctrl_label": "Контролер керування",
+    "ctrl_label": "Медіаплеєр / Контролер",
+    "psu_label": "Блок живлення",
+    "rcard_label": "Приймаюча карта",
     
-    "step_3": "Послуги та економіка",
+    "step_3": "Додаткові послуги",
     "frame_label": "Каркас (UAH)",
     "delivery_label": "Доставка (UAH)",
     "setup_label": "Монтаж / ПНР (UAH)",

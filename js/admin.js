@@ -1,294 +1,404 @@
 import { loadDB, DB } from './data/database.js';
 
-const ADMIN_STATE = {
-  repo: localStorage.getItem('gh_repo') || '',
-  token: localStorage.getItem('gh_token') || '',
-  sha: null,
-  isEditing: false
+let localDB = null;
+let currentAdminTab = 'matrices';
+let editState = {
+  type: null, // 'matrices' | 'controllers'
+  index: -1,  // -1 for new
+  data: null  // temporary form state
 };
 
+// UI Components
 const UI = {
-  renderLogin: () => `
-    <div class="admin-card auth-card">
-      <div class="admin-header">
-        <svg class="gh-icon" viewBox="0 0 16 16" width="32" height="32" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-        <h3>Авторизация GitHub</h3>
-      </div>
-      <div class="admin-body">
-        <div class="form-group">
-          <label>Репозиторий (формат: owner/repo)</label>
-          <input type="text" id="gh_repo" class="admin-input" placeholder="например: username/led-wiki" value="${ADMIN_STATE.repo}">
-        </div>
-        <div class="form-group">
-          <label>Personal Access Token</label>
-          <input type="password" id="gh_token" class="admin-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" value="${ADMIN_STATE.token}">
-        </div>
-        <div class="admin-hint">Токен сохраняется только в вашем браузере (localStorage). У токена должны быть права "repo" (или "Contents: write" для fine-grained).</div>
-        <button id="btn_login" class="admin-btn primary">Подключиться</button>
-      </div>
-    </div>
-  `,
-  
-  renderEditor: (jsonStr) => `
+  layout: () => `
     <div class="admin-layout">
       <div class="admin-sidebar">
         <div class="admin-card">
-          <h4>Настройки подключения</h4>
-          <div class="connected-info">
-            <span class="status-dot green"></span>
-            <b>${ADMIN_STATE.repo}</b>
+          <h4>Разделы</h4>
+          <div class="admin-menu">
+            <button class="menu-btn ${currentAdminTab === 'matrices' ? 'active' : ''}" data-atab="matrices">📟 LED Модули</button>
+            <button class="menu-btn ${currentAdminTab === 'controllers' ? 'active' : ''}" data-atab="controllers">🎛️ Медиаплееры</button>
+            <button class="menu-btn ${currentAdminTab === 'powerSupplies' ? 'active' : ''}" data-atab="powerSupplies">🔌 Блоки питания</button>
+            <button class="menu-btn ${currentAdminTab === 'receivingCards' ? 'active' : ''}" data-atab="receivingCards">💳 Принимающие карты</button>
           </div>
-          <button id="btn_logout" class="admin-btn outline small" style="margin-top: 12px; width: 100%;">Выйти</button>
         </div>
         <div class="admin-card" style="margin-top: 16px;">
           <h4>Действия</h4>
-          <button id="btn_format" class="admin-btn outline small" style="margin-bottom: 8px; width: 100%;">Форматировать JSON</button>
-          <button id="btn_save" class="admin-btn primary" style="width: 100%;">Отправить Push (Save)</button>
-          <div id="save_status" class="save-status"></div>
+          <button id="btn_download_json" class="admin-btn primary" style="width: 100%;">📥 Скачать JSON</button>
+          <div class="admin-hint" style="margin-top: 12px; text-align: center;">После скачивания замените файл database.json в корне проекта.</div>
         </div>
       </div>
-      <div class="admin-main">
-        <div class="admin-card editor-card">
-          <div class="editor-header">
-            <h3>Редактор database.json</h3>
-            <span id="json_validator" class="validator-badge valid">JSON Valid</span>
-          </div>
-          <textarea id="json_editor" class="admin-textarea" spellcheck="false">${jsonStr}</textarea>
-        </div>
+      <div class="admin-main" id="admin-workspace">
+        <!-- Dynamic content -->
       </div>
     </div>
-  `
+  `,
+
+
+  listView: (type, title, itemNameFunc) => {
+    const list = localDB[type] || [];
+    let html = `
+      <div class="admin-card">
+        <div class="editor-header" style="padding: 0 0 16px 0; margin-bottom: 16px;">
+          <h3>${title}</h3>
+          <button class="admin-btn primary small" id="btn_add_new">➕ Добавить</button>
+        </div>
+        <div class="admin-list">
+    `;
+    
+    list.forEach((item, index) => {
+      html += `
+        <div class="admin-list-item" data-index="${index}">
+          <div class="item-name">${itemNameFunc(item)}</div>
+          <button class="admin-btn outline small btn-delete" data-index="${index}" title="Удалить">🗑️</button>
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+    return html;
+  },
+
+  editorView: (type) => {
+    const isNew = editState.index === -1;
+    const title = isNew ? 'Добавление новой записи' : 'Редактирование записи';
+    let html = `
+      <div class="admin-card">
+        <div class="editor-header" style="padding: 0 0 16px 0; margin-bottom: 16px;">
+          <h3>${title}</h3>
+          <div>
+            <button class="admin-btn outline small" id="btn_cancel_edit" style="margin-right: 8px;">Отмена</button>
+            <button class="admin-btn primary small" id="btn_save_edit">💾 Сохранить</button>
+          </div>
+        </div>
+        <div class="form-grid">
+    `;
+
+    if (type === 'matrices') {
+      html += `
+        ${inputGroupEdit('ID (англ, без пробелов)', 'id')}
+        ${inputGroupEdit('Производитель', 'manufacturer')}
+        ${inputGroupEdit('Модель', 'model')}
+        ${inputGroupEdit('Технология', 'technology')}
+        ${inputGroupEdit('Использование (indoor/outdoor)', 'location')}
+        
+        <div class="form-divider">Характеристики</div>
+        ${inputGroupEdit('Шаг пикселя (мм)', 'pitch', 'number')}
+        ${inputGroupEdit('Яркость (nits)', 'brightness', 'number')}
+        ${inputGroupEdit('Защита (IP)', 'ip')}
+        ${inputGroupEdit('Цена (USD)', 'priceUSD', 'number')}
+        
+        <div class="form-divider">Размеры</div>
+        ${inputGroupEdit('Ширина модуля (мм)', 'moduleW', 'number')}
+        ${inputGroupEdit('Высота модуля (мм)', 'moduleH', 'number')}
+        ${inputGroupEdit('Ширина кабинета (мм)', 'cabinetW', 'number')}
+        ${inputGroupEdit('Высота кабинета (мм)', 'cabinetH', 'number')}
+        
+        <div class="form-divider">Электрика и Сигнал</div>
+        ${inputGroupEdit('Напряжение (В)', 'voltage', 'number')}
+        ${inputGroupEdit('Макс. Мощность модуля (Вт)', 'maxPowerPerModule', 'number')}
+        ${inputGroupEdit('Частота (Refresh Hz)', 'refreshHz', 'number')}
+        ${inputGroupEdit('Проводник (Au/Cu)', 'wire')}
+        
+        <div class="form-divider">Описание</div>
+        ${inputGroupEdit('Описание (RU)', 'notes_ru')}
+        ${inputGroupEdit('Описание (UK)', 'notes_uk')}
+      `;
+    } else if (type === 'controllers') {
+      html += `
+        ${inputGroupEdit('ID', 'id')}
+        ${inputGroupEdit('Производитель', 'manufacturer')}
+        ${inputGroupEdit('Модель', 'model')}
+        ${inputGroupEdit('Тип', 'type')}
+        ${inputGroupEdit('Сегмент', 'segment')}
+        
+        <div class="form-divider">Характеристики</div>
+        ${inputGroupEdit('Макс. пикселей', 'maxPixels', 'number')}
+        ${inputGroupEdit('Цена (USD)', 'priceUSD', 'number')}
+        ${inputGroupEdit('LAN Портов', 'ethernetPorts', 'number')}
+        ${inputGroupEdit('Refresh Hz', 'refreshHz', 'number')}
+        ${checkboxGroupEdit('Поддержка Облака', 'cloud')}
+        ${inputGroupEdit('Платформа', 'cloudPlatform')}
+        
+        <div class="form-divider">Описание и выгоды</div>
+        ${inputGroupEdit('Выгода (RU)', 'bestUse_ru')}
+        ${inputGroupEdit('Выгода (UK)', 'bestUse_uk')}
+        ${inputGroupEdit('Описание (RU)', 'notes_ru')}
+        ${inputGroupEdit('Описание (UK)', 'notes_uk')}
+      `;
+    } else if (type === 'powerSupplies') {
+      html += `
+        ${inputGroupEdit('ID (англ, без пробелов)', 'id')}
+        ${inputGroupEdit('Модель', 'model')}
+        
+        <div class="form-divider">Характеристики</div>
+        ${inputGroupEdit('Мощность (Вт)', 'watts', 'number')}
+        ${inputGroupEdit('Напряжение (В)', 'voltage', 'number')}
+        ${inputGroupEdit('Запас мощности (например 0.8)', 'usageFactor', 'number', 0.1)}
+        ${inputGroupEdit('Цена (USD)', 'priceUSD', 'number')}
+        
+        <div class="form-divider">Описание</div>
+        ${inputGroupEdit('Описание (RU)', 'notes_ru')}
+        ${inputGroupEdit('Описание (UK)', 'notes_uk')}
+      `;
+    } else if (type === 'receivingCards') {
+      html += `
+        ${inputGroupEdit('ID (англ, без пробелов)', 'id')}
+        ${inputGroupEdit('Модель', 'model')}
+        ${inputGroupEdit('Цена (USD)', 'priceUSD', 'number')}
+        
+        <div class="form-divider">Описание</div>
+        ${inputGroupEdit('Описание (RU)', 'notes_ru')}
+        ${inputGroupEdit('Описание (UK)', 'notes_uk')}
+      `;
+    }
+
+    html += `</div></div>`;
+    return html;
+  }
 };
 
-function b64EncodeUnicode(str) {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-      return String.fromCharCode('0x' + p1);
-  }));
+// Helpers for generic config/prices bind
+function getValueByPath(obj, path) {
+  return path.split('.').reduce((o, i) => o?.[i], obj);
 }
 
-function b64DecodeUnicode(str) {
-  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
+function setValueByPath(obj, path, value) {
+  const parts = path.split('.');
+  const last = parts.pop();
+  const target = parts.reduce((o, i) => o[i], obj);
+  target[last] = value;
 }
 
-async function fetchFromGitHub() {
-  if (!ADMIN_STATE.repo || !ADMIN_STATE.token) return;
-  
-  try {
-    const res = await fetch(`https://api.github.com/repos/${ADMIN_STATE.repo}/contents/database.json`, {
-      headers: {
-        'Authorization': `token ${ADMIN_STATE.token}`,
-        'Accept': 'application/vnd.github.v3+json'
+function inputGroup(label, path, type = 'text', step = 1) {
+  const val = getValueByPath(localDB, path);
+  const stepAttr = type === 'number' ? `step="${step}"` : '';
+  return `
+    <div class="form-group">
+      <label>${label}</label>
+      <input type="${type}" class="admin-input dyn-input" data-path="${path}" value="${val}" ${stepAttr}>
+    </div>
+  `;
+}
+
+// Helpers for specific edit mode
+function inputGroupEdit(label, key, type = 'text', step = 'any') {
+  const val = editState.data[key] !== undefined ? editState.data[key] : '';
+  const stepAttr = type === 'number' ? `step="${step}"` : '';
+  return `
+    <div class="form-group">
+      <label>${label}</label>
+      <input type="${type}" class="admin-input edit-input" data-key="${key}" value="${val}" ${stepAttr}>
+    </div>
+  `;
+}
+
+function checkboxGroupEdit(label, key) {
+  const checked = editState.data[key] ? 'checked' : '';
+  return `
+    <div class="form-group" style="display:flex; align-items:center; height:100%; margin-top:24px;">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" class="edit-input-cb" data-key="${key}" ${checked} style="width:18px;height:18px;">
+        ${label}
+      </label>
+    </div>
+  `;
+}
+
+
+function renderWorkspace() {
+  const ws = document.getElementById('admin-workspace');
+  if (!ws) return;
+
+  if (editState.type) {
+    ws.innerHTML = UI.editorView(editState.type);
+    bindEditorEvents();
+    return;
+  }
+
+  if (currentAdminTab === 'matrices') {
+    ws.innerHTML = UI.listView('matrices', 'Справочник LED Модулей', m => `<b>${m.model}</b> <span style="color:var(--text3)">(${m.pitch}мм, ${m.location})</span> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${m.priceUSD || 0}</span>`);
+    bindListEvents('matrices', () => ({
+      id: 'new_mod', manufacturer: 'Generic', model: 'New Model', technology: 'SMD', location: 'indoor',
+      pitch: 2.5, brightness: 1000, ip: 'IP30', priceUSD: 0, moduleW: 320, moduleH: 160, cabinetW: 640, cabinetH: 640,
+      voltage: 5, maxPowerPerModule: 20, refreshHz: 1920, wire: 'Cu', notes_ru: '', notes_uk: ''
+    }));
+  } else if (currentAdminTab === 'controllers') {
+    ws.innerHTML = UI.listView('controllers', 'Справочник Контроллеров', c => `<b>${c.manufacturer} ${c.model}</b> <span style="color:var(--text3)">(${c.type})</span> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${c.priceUSD || 0}</span>`);
+    bindListEvents('controllers', () => ({
+      id: 'new_ctrl', manufacturer: 'Novastar', model: 'New Controller', type: 'Sending Card', segment: 'Standard',
+      maxPixels: 1300000, priceUSD: 0, ethernetPorts: 2, refreshHz: 1920, cloud: false, cloudPlatform: '',
+      bestUse_ru: '', bestUse_uk: '', notes_ru: '', notes_uk: ''
+    }));
+  } else if (currentAdminTab === 'powerSupplies') {
+    ws.innerHTML = UI.listView('powerSupplies', 'Справочник Блоков Питания', p => `<b>${p.model}</b> <span style="color:var(--text3)">(${p.watts}W)</span> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${p.priceUSD || 0}</span>`);
+    bindListEvents('powerSupplies', () => ({
+      id: 'new_psu', model: 'Новый Блок Питания', watts: 300, voltage: 5, usageFactor: 0.8, priceUSD: 0,
+      notes_ru: '', notes_uk: ''
+    }));
+  } else if (currentAdminTab === 'receivingCards') {
+    ws.innerHTML = UI.listView('receivingCards', 'Справочник Принимающих Карт', r => `<b>${r.model}</b> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${r.priceUSD || 0}</span>`);
+    bindListEvents('receivingCards', () => ({
+      id: 'new_rcard', model: 'Новая Принимающая Карта', priceUSD: 15,
+      notes_ru: '', notes_uk: ''
+    }));
+  }
+}
+
+function bindSettingsEvents() {
+  document.querySelectorAll('.dyn-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const path = e.target.dataset.path;
+      let val = e.target.value;
+      if (e.target.type === 'number') val = parseFloat(val) || 0;
+      setValueByPath(localDB, path, val);
+    });
+  });
+}
+
+function bindListEvents(type, defaultItemFactory) {
+  // Add new
+  document.getElementById('btn_add_new').addEventListener('click', () => {
+    editState = { type, index: -1, data: defaultItemFactory() };
+    renderWorkspace();
+  });
+
+  // Edit existing
+  document.querySelectorAll('.admin-list-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-delete')) return; // ignore delete clicks
+      const idx = parseInt(item.dataset.index);
+      editState = { type, index: idx, data: JSON.parse(JSON.stringify(localDB[type][idx])) };
+      renderWorkspace();
+    });
+  });
+
+  // Delete
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm('Точно удалить этот элемент?')) {
+        const idx = parseInt(btn.dataset.index);
+        localDB[type].splice(idx, 1);
+        renderWorkspace();
       }
     });
-    
-    if (res.status === 404) {
-      throw new Error('Файл database.json не найден в репозитории.');
-    }
-    if (res.status === 401) {
-      throw new Error('Неверный токен или нет доступа.');
-    }
-    if (!res.ok) {
-      throw new Error(`Ошибка API: ${res.statusText}`);
-    }
-    
-    const data = await res.json();
-    ADMIN_STATE.sha = data.sha;
-    
-    const content = b64DecodeUnicode(data.content);
-    return content;
-  } catch (e) {
-    alert('Ошибка подключения: ' + e.message);
-    return null;
-  }
-}
-
-async function pushToGitHub(newContent) {
-  const btnSave = document.getElementById('btn_save');
-  const status = document.getElementById('save_status');
-  btnSave.disabled = true;
-  btnSave.textContent = 'Отправка...';
-  status.textContent = '';
-  status.className = 'save-status';
-
-  try {
-    const res = await fetch(`https://api.github.com/repos/${ADMIN_STATE.repo}/contents/database.json`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${ADMIN_STATE.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'Update database.json via CMS',
-        content: b64EncodeUnicode(newContent),
-        sha: ADMIN_STATE.sha
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Ошибка сохранения');
-    }
-
-    const data = await res.json();
-    ADMIN_STATE.sha = data.content.sha; // Update SHA for subsequent edits
-    
-    status.textContent = 'Успешно сохранено и запушено!';
-    status.classList.add('success');
-    
-    // Refresh local app state
-    await loadDB();
-    if (window.updateCalc) window.updateCalc();
-    
-  } catch (e) {
-    status.textContent = 'Ошибка: ' + e.message;
-    status.classList.add('error');
-  } finally {
-    btnSave.disabled = false;
-    btnSave.textContent = 'Отправить Push (Save)';
-  }
-}
-
-function bindLoginEvents() {
-  document.getElementById('btn_login').addEventListener('click', async () => {
-    const r = document.getElementById('gh_repo').value.trim();
-    const t = document.getElementById('gh_token').value.trim();
-    if (!r || !t) return alert('Заполните оба поля');
-    
-    ADMIN_STATE.repo = r;
-    ADMIN_STATE.token = t;
-    
-    const btn = document.getElementById('btn_login');
-    btn.textContent = 'Проверка...';
-    btn.disabled = true;
-    
-    const content = await fetchFromGitHub();
-    if (content !== null) {
-      localStorage.setItem('gh_repo', r);
-      localStorage.setItem('gh_token', t);
-      ADMIN_STATE.isEditing = true;
-      render(content);
-    } else {
-      btn.textContent = 'Подключиться';
-      btn.disabled = false;
-    }
   });
 }
 
 function bindEditorEvents() {
-  const textarea = document.getElementById('json_editor');
-  const validator = document.getElementById('json_validator');
-  const btnFormat = document.getElementById('btn_format');
-  const btnSave = document.getElementById('btn_save');
-  const btnLogout = document.getElementById('btn_logout');
-
-  const checkJSON = () => {
-    try {
-      JSON.parse(textarea.value);
-      validator.textContent = 'JSON Valid';
-      validator.className = 'validator-badge valid';
-      btnSave.disabled = false;
-      return true;
-    } catch (e) {
-      validator.textContent = 'Invalid JSON!';
-      validator.className = 'validator-badge invalid';
-      btnSave.disabled = true;
-      return false;
-    }
-  };
-
-  textarea.addEventListener('input', checkJSON);
-
-  btnFormat.addEventListener('click', () => {
-    if (checkJSON()) {
-      textarea.value = JSON.stringify(JSON.parse(textarea.value), null, 2);
-    }
+  // Cancel
+  document.getElementById('btn_cancel_edit').addEventListener('click', () => {
+    editState = { type: null, index: -1, data: null };
+    renderWorkspace();
   });
 
-  btnSave.addEventListener('click', () => {
-    if (checkJSON()) {
-      pushToGitHub(textarea.value);
+  // Save
+  document.getElementById('btn_save_edit').addEventListener('click', () => {
+    // Collect data
+    document.querySelectorAll('.edit-input').forEach(input => {
+      const key = input.dataset.key;
+      let val = input.value;
+      if (input.type === 'number') val = parseFloat(val) || 0;
+      editState.data[key] = val;
+    });
+    
+    document.querySelectorAll('.edit-input-cb').forEach(cb => {
+      editState.data[cb.dataset.key] = cb.checked;
+    });
+
+    if (editState.index === -1) {
+      localDB[editState.type].push(editState.data);
+    } else {
+      localDB[editState.type][editState.index] = editState.data;
     }
-  });
-  
-  btnLogout.addEventListener('click', () => {
-    ADMIN_STATE.isEditing = false;
-    render();
+
+    editState = { type: null, index: -1, data: null };
+    renderWorkspace();
   });
 }
 
-function render(editorContent = null) {
-  const container = document.getElementById('admin-app');
-  if (!container) return;
-
-  if (ADMIN_STATE.isEditing && editorContent !== null) {
-    container.innerHTML = UI.renderEditor(editorContent);
-    bindEditorEvents();
-  } else {
-    container.innerHTML = UI.renderLogin();
-    bindLoginEvents();
-  }
+function downloadJSON() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(localDB, null, 2));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", "database.json");
+  dlAnchorElem.click();
 }
 
-// Global initialization logic for admin
-export function initAdmin() {
-  // Add CSS dynamically for admin UI to keep separation of concerns
-  if (!document.getElementById('admin-styles')) {
-    const style = document.createElement('style');
-    style.id = 'admin-styles';
-    style.textContent = `
-      #admin-app { margin-top: 24px; font-family: 'Inter', sans-serif; }
-      .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
-      .auth-card { max-width: 480px; margin: 0 auto; }
-      .admin-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-      .admin-header h3 { margin: 0; font-size: 20px; color: var(--text); font-weight: 600; }
-      .gh-icon { color: var(--text); }
-      .form-group { margin-bottom: 16px; }
-      .form-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--text2); }
-      .admin-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; background: var(--bg2); color: var(--text); outline: none; transition: 0.2s; }
-      .admin-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
-      .admin-hint { font-size: 12px; color: var(--text3); margin-bottom: 24px; line-height: 1.5; }
-      .admin-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
-      .admin-btn.primary { background: var(--accent); color: #fff; width: 100%; }
-      .admin-btn.primary:hover { background: #0284c7; }
-      .admin-btn.primary:disabled { background: #94a3b8; cursor: not-allowed; }
-      .admin-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
-      .admin-btn.outline:hover { background: var(--bg2); color: var(--text); }
-      .admin-btn.small { padding: 6px 12px; font-size: 13px; }
-      
-      .admin-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
-      @media (max-width: 768px) { .admin-layout { grid-template-columns: 1fr; } }
-      .connected-info { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 12px; background: var(--bg2); border-radius: 6px; margin-top: 12px; word-break: break-all; }
-      .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-      .status-dot.green { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
-      
-      .editor-card { display: flex; flex-direction: column; height: 70vh; min-height: 500px; padding: 0; overflow: hidden; }
-      .editor-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--bg); }
-      .editor-header h3 { margin: 0; font-size: 16px; }
-      .validator-badge { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
-      .validator-badge.valid { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-      .validator-badge.invalid { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-      .admin-textarea { flex: 1; width: 100%; border: none; resize: none; padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.6; background: var(--card); color: var(--text); outline: none; }
-      .admin-textarea:focus { box-shadow: inset 0 0 0 2px var(--accent); }
-      
-      .save-status { margin-top: 12px; font-size: 13px; font-weight: 500; text-align: center; }
-      .save-status.success { color: #10b981; }
-      .save-status.error { color: #ef4444; }
-    `;
-    document.head.appendChild(style);
-  }
+export async function initAdmin() {
+  addAdminStyles();
 
-  // Hook into the tab button to load data only when opened
+  // Load fresh DB if not already loaded
+  await loadDB();
+  // Clone it so we don't mess up the live calculator until downloaded/reloaded
+  localDB = JSON.parse(JSON.stringify(DB));
+
   document.querySelector('.tab-btn[data-tab="admin"]').addEventListener('click', () => {
-    // If we have token, we can try to auto-login, or just show the login screen
-    if (ADMIN_STATE.repo && ADMIN_STATE.token && !ADMIN_STATE.isEditing) {
-      document.getElementById('btn_login')?.click(); 
+    const container = document.getElementById('admin-app');
+    if (!container.innerHTML.trim()) {
+      container.innerHTML = UI.layout();
+      
+      // Bind Menu
+      document.querySelectorAll('.menu-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          currentAdminTab = e.target.dataset.atab;
+          editState = { type: null, index: -1, data: null };
+          renderWorkspace();
+        });
+      });
+
+      // Bind Download
+      document.getElementById('btn_download_json').addEventListener('click', downloadJSON);
+
+      renderWorkspace();
     }
   });
+}
 
-  render();
+function addAdminStyles() {
+  if (document.getElementById('admin-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'admin-styles';
+  style.textContent = `
+    #admin-app { margin-top: 24px; font-family: 'Inter', sans-serif; }
+    .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
+    
+    .admin-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 768px) { .admin-layout { grid-template-columns: 1fr; } }
+    
+    .admin-menu { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .menu-btn { padding: 12px 16px; text-align: left; background: transparent; border: 1px solid transparent; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text2); transition: 0.2s; }
+    .menu-btn:hover { background: var(--bg2); }
+    .menu-btn.active { background: #eff6ff; color: var(--accent); border-color: #bfdbfe; font-weight: 600; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text2); }
+    .admin-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: var(--bg2); color: var(--text); outline: none; transition: 0.2s; }
+    .admin-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); background: #fff; }
+    
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-divider { grid-column: 1 / -1; margin-top: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--border); font-weight: 700; color: var(--accent); font-size: 14px; text-transform: uppercase; }
+
+    .admin-list { display: flex; flex-direction: column; gap: 8px; }
+    .admin-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .admin-list-item:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: #fff; }
+    .item-name { font-size: 15px; color: var(--text); }
+    
+    .admin-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
+    .admin-btn.primary { background: var(--accent); color: #fff; }
+    .admin-btn.primary:hover { background: #0284c7; }
+    .admin-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+    .admin-btn.outline:hover { background: var(--bg2); color: var(--text); }
+    .admin-btn.small { padding: 6px 12px; font-size: 13px; }
+    
+    .editor-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .editor-header h3 { margin: 0; font-size: 18px; color: var(--text); }
+  `;
+  document.head.appendChild(style);
 }
 
 if (document.readyState === 'loading') {
