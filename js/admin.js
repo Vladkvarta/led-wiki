@@ -47,7 +47,7 @@ const UI = {
         </div>
         <div class="admin-list">
     `;
-    
+
     list.forEach((item, index) => {
       html += `
         <div class="admin-list-item" data-index="${index}">
@@ -56,7 +56,7 @@ const UI = {
         </div>
       `;
     });
-    
+
     html += `</div></div>`;
     return html;
   },
@@ -244,13 +244,13 @@ function renderWorkspace() {
       notes_ru: '', notes_uk: ''
     }));
   } else if (currentAdminTab === 'receivingCards') {
-      ws.innerHTML = UI.listView('receivingCards', 'Справочник Принимающих Карт', r => `<b>${r.model}</b> <span style="color:var(--text3)">(${r.hubPorts} ports)</span> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${r.priceUSD || 0}</span>`);
-      bindListEvents('receivingCards', () => ({
-        id: 'new_rcard', model: 'Новая Принимающая Карта', priceUSD: 15,
-        hubPorts: 16, maxPxW: 256, maxPxH: 256,
-        notes_ru: '', notes_uk: ''
-      }));
-    }
+    ws.innerHTML = UI.listView('receivingCards', 'Справочник Принимающих Карт', r => `<b>${r.model}</b> <span style="color:var(--text3)">(${r.hubPorts} ports)</span> <span style="color:#10b981; font-weight:600; margin-left:12px;">$${r.priceUSD || 0}</span>`);
+    bindListEvents('receivingCards', () => ({
+      id: 'new_rcard', model: 'Новая Принимающая Карта', priceUSD: 15,
+      hubPorts: 16, maxPxW: 256, maxPxH: 256,
+      notes_ru: '', notes_uk: ''
+    }));
+  }
 }
 
 function bindSettingsEvents() {
@@ -280,7 +280,7 @@ function bindListEvents(type, defaultItemFactory) {
       renderWorkspace();
     });
   });
-
+  //
   // Delete
   document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -310,7 +310,7 @@ function bindEditorEvents() {
       if (input.type === 'number') val = parseFloat(val) || 0;
       editState.data[key] = val;
     });
-    
+
     document.querySelectorAll('.edit-input-cb').forEach(cb => {
       editState.data[cb.dataset.key] = cb.checked;
     });
@@ -398,11 +398,11 @@ function showAdminLogin(onSuccess) {
         headers: { 'Authorization': `token ${token}` }
       });
       if (!res.ok) throw new Error('Неверный токен или нет прав доступа');
-      
+
       const data = await res.json();
       githubToken = token;
       fileSha = data.sha;
-      
+
       overlay.classList.remove('visible');
       overlay.classList.add('success');
       setTimeout(() => { overlay.remove(); onSuccess(); }, 400);
