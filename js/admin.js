@@ -424,10 +424,7 @@ function showAdminLogin(onSuccess) {
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
   cancelBtn.addEventListener('click', () => {
     overlay.classList.remove('visible');
-    setTimeout(() => {
-      overlay.remove();
-      document.querySelector('.tab-btn[data-tab="calc"]').click();
-    }, 300);
+    setTimeout(() => overlay.remove(), 300);
   });
 }
 
@@ -448,11 +445,22 @@ function mountAdminPanel(container) {
   // Bind Publish
   const pushBtn = document.getElementById('btn_push_github');
   if (pushBtn) {
-    pushBtn.addEventListener('click', async () => {
+    const doPush = async () => {
       pushBtn.disabled = true;
       pushBtn.innerHTML = '⏳ Публикация...';
       
       try {
+        // Always fetch latest SHA to prevent conflicts
+        const getRes = await fetch('https://api.github.com/repos/Vladkvarta/led-wiki/contents/database.json', {
+            headers: { 'Authorization': `token ${githubToken}` }
+        });
+        if (!getRes.ok) {
+            githubToken = ''; // Invalid token
+            throw new Error('Не удалось получить файл. Возможно, токен устарел или нет прав.');
+        }
+        const currentData = await getRes.json();
+        const latestSha = currentData.sha;
+
         const contentStr = JSON.stringify(localDB, null, 2);
         // Encode utf-8 to base64 properly
         const encoded = btoa(unescape(encodeURIComponent(contentStr)));
@@ -466,7 +474,7 @@ function mountAdminPanel(container) {
           body: JSON.stringify({
             message: 'Update database from CMS',
             content: encoded,
-            sha: fileSha
+            sha: latestSha
           })
         });
 
@@ -499,6 +507,14 @@ function mountAdminPanel(container) {
           pushBtn.disabled = false;
         }, 4000);
       }
+    };
+
+    pushBtn.addEventListener('click', () => {
+      if (!githubToken) {
+        showAdminLogin(doPush);
+      } else {
+        doPush();
+      }
     });
   }
   renderWorkspace();
@@ -515,7 +531,7 @@ export async function initAdmin() {
   document.querySelector('.tab-btn[data-tab="admin"]').addEventListener('click', () => {
     const container = document.getElementById('admin-app');
     if (!container.innerHTML.trim()) {
-      showAdminLogin(() => mountAdminPanel(container));
+      mountAdminPanel(container);
     }
   });
 }
