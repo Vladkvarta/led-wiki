@@ -28,7 +28,7 @@
           <path d="m21 21-4.35-4.35" />
         </svg>
         <input type="text" id="globalSearch" data-i18n="search_ph" placeholder="Поиск по справочнику…"
-          oninput="window.doSearch && window.doSearch(this.value)">
+          oninput="window.doSearch && window.doSearch(this.value)" autocomplete="off" name="search_random">
       </div>
       <div class="lang-switch">
         <button class="lang-btn active" id="lang_ru">RU</button>
@@ -857,8 +857,8 @@
 
     </main>
 
-    <script type="module" src="js/app.js?v=2"></script>
-    <script type="module" src="js/admin.js?v=8"></script>
+    <script type="module" src="js/app.js?v=3"></script>
+    <script type="module" src="js/admin.js?v=9"></script>
     <script>
 
       // Calculators

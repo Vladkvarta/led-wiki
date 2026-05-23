@@ -357,7 +357,7 @@ function showAdminLogin(onSuccess) {
             id="login-password-input"
             class="login-input"
             placeholder="ghp_..."
-            autocomplete="current-password"
+            autocomplete="new-password"
           />
         </div>
         <div id="login-error" class="login-error hidden">Неверный токен. Попробуйте ещё раз.</div>
