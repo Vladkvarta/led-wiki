@@ -332,6 +332,101 @@ function downloadJSON() {
   dlAnchorElem.click();
 }
 
+function showAdminLogin(onSuccess) {
+  // Remove existing overlay if any
+  const existing = document.getElementById('admin-login-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'admin-login-overlay';
+  overlay.innerHTML = `
+    <div class="login-backdrop"></div>
+    <div class="login-card" id="login-card">
+      <div class="login-lock-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2 class="login-title">Панель управления</h2>
+      <p class="login-subtitle">Введите пароль для доступа к базе данных</p>
+      <div class="login-form">
+        <div class="login-input-wrap">
+          <svg class="login-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input
+            type="password"
+            id="login-password-input"
+            class="login-input"
+            placeholder="Пароль..."
+            autocomplete="current-password"
+          />
+        </div>
+        <div id="login-error" class="login-error hidden">Неверный пароль. Попробуйте ещё раз.</div>
+        <button id="login-submit-btn" class="login-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span>Войти</span>
+        </button>
+      </div>
+      <div class="login-cancel-wrap">
+        <button id="login-cancel-btn" class="login-cancel">← Вернуться назад</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Animate in
+  requestAnimationFrame(() => overlay.classList.add('visible'));
+
+  const input = document.getElementById('login-password-input');
+  const submitBtn = document.getElementById('login-submit-btn');
+  const cancelBtn = document.getElementById('login-cancel-btn');
+  const errorEl = document.getElementById('login-error');
+  const card = document.getElementById('login-card');
+
+  // Focus input
+  setTimeout(() => input.focus(), 300);
+
+  function doLogin() {
+    if (input.value === 'ledwiki') {
+      overlay.classList.remove('visible');
+      overlay.classList.add('success');
+      setTimeout(() => { overlay.remove(); onSuccess(); }, 400);
+    } else {
+      errorEl.classList.remove('hidden');
+      card.classList.add('shake');
+      input.value = '';
+      setTimeout(() => card.classList.remove('shake'), 600);
+    }
+  }
+
+  submitBtn.addEventListener('click', doLogin);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+  cancelBtn.addEventListener('click', () => {
+    overlay.classList.remove('visible');
+    setTimeout(() => {
+      overlay.remove();
+      document.querySelector('.tab-btn[data-tab="calc"]').click();
+    }, 300);
+  });
+}
+
+function mountAdminPanel(container) {
+  container.innerHTML = UI.layout();
+
+  // Bind Menu
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentAdminTab = e.target.dataset.atab;
+      editState = { type: null, index: -1, data: null };
+      renderWorkspace();
+    });
+  });
+
+  // Bind Download
+  document.getElementById('btn_download_json').addEventListener('click', downloadJSON);
+
+  renderWorkspace();
+}
+
 export async function initAdmin() {
   addAdminStyles();
 
@@ -343,31 +438,7 @@ export async function initAdmin() {
   document.querySelector('.tab-btn[data-tab="admin"]').addEventListener('click', () => {
     const container = document.getElementById('admin-app');
     if (!container.innerHTML.trim()) {
-      const pass = prompt('Введите пароль для входа в Админку:');
-      if (pass !== 'ledwiki') {
-        alert('Неверный пароль!');
-        // Переключаем обратно на первую вкладку (Калькулятор)
-        document.querySelector('.tab-btn[data-tab="calc"]').click();
-        return;
-      }
-      
-      container.innerHTML = UI.layout();
-      
-      // Bind Menu
-      document.querySelectorAll('.menu-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-          e.target.classList.add('active');
-          currentAdminTab = e.target.dataset.atab;
-          editState = { type: null, index: -1, data: null };
-          renderWorkspace();
-        });
-      });
-
-      // Bind Download
-      document.getElementById('btn_download_json').addEventListener('click', downloadJSON);
-
-      renderWorkspace();
+      showAdminLogin(() => mountAdminPanel(container));
     }
   });
 }
@@ -411,6 +482,116 @@ function addAdminStyles() {
     
     .editor-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
     .editor-header h3 { margin: 0; font-size: 18px; color: var(--text); }
+
+    /* ===== ADMIN LOGIN OVERLAY ===== */
+    #admin-login-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.25s ease;
+    }
+    #admin-login-overlay.visible { opacity: 1; }
+    #admin-login-overlay.success { opacity: 0; pointer-events: none; }
+
+    .login-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(26, 36, 56, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .login-card {
+      position: relative; z-index: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px 32px;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 8px 40px rgba(26,111,212,0.15), 0 2px 8px rgba(0,0,0,0.08);
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1), opacity 0.25s ease;
+      text-align: center;
+    }
+    #admin-login-overlay.visible .login-card {
+      transform: translateY(0) scale(1);
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      15%      { transform: translateX(-8px); }
+      30%      { transform: translateX(8px); }
+      45%      { transform: translateX(-6px); }
+      60%      { transform: translateX(6px); }
+      80%      { transform: translateX(-3px); }
+    }
+    .login-card.shake { animation: shake 0.45s ease; }
+
+    .login-lock-icon {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(26,111,212,0.10);
+      border: 1px solid rgba(26,111,212,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 22px;
+    }
+
+    .login-title {
+      font-size: 20px; font-weight: 700;
+      color: var(--text); margin: 0 0 6px;
+    }
+    .login-subtitle {
+      font-size: 13px; color: var(--text3); margin: 0 0 28px;
+    }
+
+    .login-form { display: flex; flex-direction: column; gap: 10px; }
+
+    .login-input-wrap { position: relative; }
+    .login-input-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text3); pointer-events: none;
+    }
+    .login-input {
+      width: 100%; box-sizing: border-box;
+      padding: 10px 12px 10px 38px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 6px; font-size: 14px; color: var(--text);
+      font-family: 'Inter', sans-serif; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .login-input:focus {
+      border-color: var(--accent); background: #fff;
+      box-shadow: 0 0 0 3px rgba(26,111,212,0.12);
+    }
+
+    .login-error {
+      font-size: 13px; color: var(--danger);
+      background: rgba(204,34,51,0.07);
+      border: 1px solid rgba(204,34,51,0.2);
+      border-radius: 6px; padding: 9px 12px; text-align: left;
+    }
+    .login-error.hidden { display: none; }
+
+    .login-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 20px; margin-top: 2px;
+      background: linear-gradient(135deg, var(--accent), #3a90f0);
+      border: none; border-radius: 6px;
+      color: #fff; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .login-btn:hover { opacity: 0.9; }
+    .login-btn:active { transform: scale(0.98); }
+
+    .login-cancel-wrap {
+      margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;
+    }
+    .login-cancel {
+      background: none; border: none; color: var(--text3); font-size: 13px;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: color 0.2s;
+    }
+    .login-cancel:hover { color: var(--accent); }
+
+
   `;
   document.head.appendChild(style);
 }
