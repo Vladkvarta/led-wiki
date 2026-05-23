@@ -569,10 +569,10 @@
     {
       "id": "rc_5a75b",
       "model": "Colorlight 5A-75B",
-      "priceUSD": 14,
+      "priceUSD": 13,
       "notes_ru": "Интегрированный HUB75, нагрузка до 256x256 px",
       "notes_uk": "Інтегрований HUB75, навантаження до 256x256 px",
-      "hubPorts": 16,
+      "hubPorts": 8,
       "maxPxW": 256,
       "maxPxH": 256
     }
