@@ -445,9 +445,62 @@ function mountAdminPanel(container) {
     });
   });
 
-  // Bind Download
-  document.getElementById('btn_download_json').addEventListener('click', downloadJSON);
+  // Bind Publish
+  const pushBtn = document.getElementById('btn_push_github');
+  if (pushBtn) {
+    pushBtn.addEventListener('click', async () => {
+      pushBtn.disabled = true;
+      pushBtn.innerHTML = '⏳ Публикация...';
+      
+      try {
+        const contentStr = JSON.stringify(localDB, null, 2);
+        // Encode utf-8 to base64 properly
+        const encoded = btoa(unescape(encodeURIComponent(contentStr)));
 
+        const res = await fetch('https://api.github.com/repos/Vladkvarta/led-wiki/contents/database.json', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${githubToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: 'Update database from CMS',
+            content: encoded,
+            sha: fileSha
+          })
+        });
+
+        if (!res.ok) {
+           const errData = await res.json();
+           throw new Error(errData.message || 'Ошибка публикации');
+        }
+        const data = await res.json();
+        fileSha = data.content.sha; // update SHA for future pushes
+
+        pushBtn.innerHTML = '✅ Опубликовано';
+        pushBtn.style.background = '#10b981';
+        pushBtn.style.borderColor = '#10b981';
+        setTimeout(() => {
+          pushBtn.innerHTML = '🚀 Опубликовать в GitHub';
+          pushBtn.style.background = '';
+          pushBtn.style.borderColor = '';
+          pushBtn.disabled = false;
+        }, 3000);
+      } catch (e) {
+        console.error(e);
+        pushBtn.innerHTML = '❌ Ошибка!';
+        pushBtn.style.background = 'var(--danger)';
+        pushBtn.style.borderColor = 'var(--danger)';
+        alert('Ошибка при публикации: ' + e.message);
+        setTimeout(() => {
+          pushBtn.innerHTML = '🚀 Опубликовать в GitHub';
+          pushBtn.style.background = '';
+          pushBtn.style.borderColor = '';
+          pushBtn.disabled = false;
+        }, 4000);
+      }
+    });
+  }
   renderWorkspace();
 }
 
