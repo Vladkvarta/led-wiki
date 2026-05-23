@@ -2,6 +2,8 @@ import { loadDB, DB } from './data/database.js';
 
 let localDB = null;
 let currentAdminTab = 'matrices';
+let githubToken = '';
+let fileSha = '';
 let editState = {
   type: null, // 'matrices' | 'controllers'
   index: -1,  // -1 for new
@@ -24,8 +26,8 @@ const UI = {
         </div>
         <div class="admin-card" style="margin-top: 16px;">
           <h4>Действия</h4>
-          <button id="btn_download_json" class="admin-btn primary" style="width: 100%;">📥 Скачать JSON</button>
-          <div class="admin-hint" style="margin-top: 12px; text-align: center;">После скачивания замените файл database.json в корне проекта.</div>
+          <button id="btn_push_github" class="admin-btn primary" style="width: 100%;">🚀 Опубликовать в GitHub</button>
+          <div class="admin-hint" style="margin-top: 12px; text-align: center; font-size: 13px; color: var(--text3);">Изменения сразу применятся на сайте</div>
         </div>
       </div>
       <div class="admin-main" id="admin-workspace">
@@ -346,7 +348,7 @@ function showAdminLogin(onSuccess) {
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
       <h2 class="login-title">Панель управления</h2>
-      <p class="login-subtitle">Введите пароль для доступа к базе данных</p>
+      <p class="login-subtitle">Введите ваш GitHub Token (Classic)</p>
       <div class="login-form">
         <div class="login-input-wrap">
           <svg class="login-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -354,11 +356,11 @@ function showAdminLogin(onSuccess) {
             type="password"
             id="login-password-input"
             class="login-input"
-            placeholder="Пароль..."
+            placeholder="ghp_..."
             autocomplete="current-password"
           />
         </div>
-        <div id="login-error" class="login-error hidden">Неверный пароль. Попробуйте ещё раз.</div>
+        <div id="login-error" class="login-error hidden">Неверный токен. Попробуйте ещё раз.</div>
         <button id="login-submit-btn" class="login-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
           <span>Войти</span>
@@ -383,15 +385,37 @@ function showAdminLogin(onSuccess) {
   // Focus input
   setTimeout(() => input.focus(), 300);
 
-  function doLogin() {
-    if (input.value === 'ledwiki') {
+  async function doLogin() {
+    const token = input.value.trim();
+    if (!token) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Проверка...';
+    errorEl.classList.add('hidden');
+
+    try {
+      const res = await fetch('https://api.github.com/repos/Vladkvarta/led-wiki/contents/database.json', {
+        headers: { 'Authorization': `token ${token}` }
+      });
+      if (!res.ok) throw new Error('Неверный токен или нет прав доступа');
+      
+      const data = await res.json();
+      githubToken = token;
+      fileSha = data.sha;
+      
       overlay.classList.remove('visible');
       overlay.classList.add('success');
       setTimeout(() => { overlay.remove(); onSuccess(); }, 400);
-    } else {
+    } catch (e) {
+      errorEl.textContent = e.message;
       errorEl.classList.remove('hidden');
       card.classList.add('shake');
       input.value = '';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span>Войти</span>
+      `;
       setTimeout(() => card.classList.remove('shake'), 600);
     }
   }
