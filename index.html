@@ -1,651 +1,936 @@
 <link href="css/main.css" rel="stylesheet">
 <link href="css/wiki.css" rel="stylesheet">
-</head><body>
-<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>LED База знаний</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><link href="css/main.css" rel="stylesheet">
-<link href="css/wiki.css" rel="stylesheet">
-</head><body>
-<header class="header">
-  <div class="logo"><div class="logo-dot"></div><span data-i18n="nav_knowledge">LED База знаний</span></div>
-  <div class="search-wrap">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="globalSearch" data-i18n="search_ph" placeholder="Поиск по справочнику…" oninput="window.doSearch && window.doSearch(this.value)">
-  </div>
-  <div class="lang-switch">
-    <button class="lang-btn active" id="lang_ru">RU</button>
-    <button class="lang-btn" id="lang_uk">UA</button>
-  </div>
-</header>
-<nav class="nav-bar">
-  <button class="tab-btn active" data-tab="knowledge">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-    <span data-i18n="nav_knowledge">База знаний</span>
-  </button>
-  <button class="tab-btn" data-tab="calc">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
-    <span data-i18n="nav_calc">Калькулятор</span>
-  </button>
-  <button class="tab-btn" data-tab="guide">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-    <span data-i18n="nav_guide">Инструкция настройки</span>
-  </button>
-  <button class="tab-btn" data-tab="admin">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    <span data-i18n="nav_admin">Админка (CMS)</span>
-  </button>
-</nav>
-<main class="main" id="mainContent">
-<!-- KNOWLEDGE BASE -->
-<section class="section active" id="tab-knowledge">
-  <div class="wiki-layout">
-    <aside class="wiki-sidebar" id="wikiSidebar"></aside>
-    <div class="wiki-content">
-      <div id="wikiContentArea"></div>
-      <div class="wiki-pagination">
-        <button class="wiki-btn hidden" id="wikiPrevBtn"></button>
-        <button class="wiki-btn hidden" id="wikiNextBtn"></button>
-      </div>
-    </div>
-  </div>
-</section>
+</head>
 
-<!-- CALCULATOR TAB -->
-<section class="section" id="tab-calc">
-  <div class="page-title" data-i18n="calc_title" style="margin-bottom: 24px;">Смета и расчет проекта</div>
-  
-  <div class="calc-wizard">
-    <!-- Блок 1: Исходные данные -->
-    <div class="wizard-step">
-      <div class="step-header">
-        <div class="step-num">1</div>
-        <div class="step-title" data-i18n="step_1">Параметры и габариты</div>
-      </div>
-      <div class="step-body">
-        <div class="form-row-3">
-          <div class="form-group">
-            <label data-i18n="env_label">Среда использования</label>
-            <select id="w_env" onchange="window.updateCalc()">
-              <option value="indoor" data-i18n="env_in">Внутренний (Indoor)</option>
-              <option value="outdoor" data-i18n="env_out">Уличный (Outdoor)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label data-i18n="width_label">Желаемая ширина (мм)</label>
-            <input type="number" id="w_width" value="" step="10" min="100" placeholder="Например: 3000" oninput="window.updateCalc()">
-          </div>
-          <div class="form-group">
-            <label data-i18n="height_label">Желаемая высота (мм)</label>
-            <input type="number" id="w_height" value="" step="10" min="100" placeholder="Например: 2000" oninput="window.updateCalc()">
-          </div>
-        </div>
-        <div class="form-row-1" style="margin-top: 16px;">
-          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; color:var(--text);"><input type="checkbox" id="w_two_sides" onchange="window.updateCalc()" style="width:18px; height:18px;"><span data-i18n="two_sides">2 стороны (Двусторонний)</span></label>
-        </div>
-      </div>
-    </div>
+<body>
+  <!DOCTYPE html>
+  <html lang="ru">
 
-    <!-- Блок 2: Оборудование -->
-    <div class="wizard-step">
-      <div class="step-header">
-        <div class="step-num">2</div>
-        <div class="step-title" data-i18n="step_2">Выбор комплектующих</div>
-      </div>
-      <div class="step-body">
-        <div class="form-row-2">
-          <div class="form-group">
-            <label data-i18n="mod_label">Модуль LED</label>
-            <select id="w_mod" onchange="window.updateCalc()"></select>
-            <div id="w_mod_hints" class="hint-box"></div>
-          </div>
-          <div class="form-group">
-            <label data-i18n="ctrl_label">Медиаплеер / Контроллер</label>
-            <select id="w_ctrl" onchange="window.updateCalc()"></select>
-            <div id="w_ctrl_hints" class="hint-box"></div>
-          </div>
-          <div class="form-group">
-            <label data-i18n="psu_label">Блок питания</label>
-            <select id="w_psu" onchange="window.updateCalc()"></select>
-            <div id="w_psu_hints" class="hint-box"></div>
-          </div>
-          <div class="form-group">
-            <label data-i18n="rcard_label">Принимающая карта</label>
-            <select id="w_rcard" onchange="window.updateCalc()"></select>
-            <div id="w_rcard_hints" class="hint-box"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>LED База знаний</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/wiki.css" rel="stylesheet">
+  </head>
 
-    <!-- Блок 3: Услуги и Наценки -->
-    <div class="wizard-step">
-      <div class="step-header">
-        <div class="step-num">3</div>
-        <div class="step-title" data-i18n="step_3">Услуги и экономика</div>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <div class="logo-dot"></div><span data-i18n="nav_knowledge">LED База знаний</span>
       </div>
-      <div class="step-body">
-        <div class="form-row-4">
-          <div class="form-group">
-            <label data-i18n="frame_label">Каркас (UAH)</label>
-            <input type="number" id="w_frame" value="0" min="0" oninput="window.updateCalc()">
-          </div>
-          <div class="form-group">
-            <label data-i18n="delivery_label">Доставка (UAH)</label>
-            <input type="number" id="w_delivery" value="0" min="0" oninput="window.updateCalc()">
-          </div>
-          <div class="form-group">
-            <label data-i18n="setup_label">Монтаж / ПНР (UAH)</label>
-            <input type="number" id="w_setup" value="0" min="0" oninput="window.updateCalc()">
-          </div>
-          <div class="form-group">
-            <label data-i18n="discount_label">Скидка на ПНР (%)</label>
-            <input type="number" id="w_discount" value="0" min="0" max="100" oninput="window.updateCalc()">
-          </div>
-        </div>
-        <div class="form-row-2" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px;">
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label data-i18n="usd_label">Курс USD (UAH)</label>
-            <input type="number" id="w_usd_rate" value="" step="0.1" placeholder="41.5" oninput="window.updateCalc()">
-          </div>
-        </div>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input type="text" id="globalSearch" data-i18n="search_ph" placeholder="Поиск по справочнику…"
+          oninput="window.doSearch && window.doSearch(this.value)">
       </div>
-    </div>
-
-    <!-- Блок 4: Итоговая смета (Receipt) -->
-    <div class="wizard-receipt" id="printable-offer">
-      <div class="receipt-header">
-        <span data-i18n="co_title">Коммерческое предложение</span>
-        <button class="admin-btn primary small no-print" onclick="window.print()" style="font-size: 13px; padding: 6px 12px; margin: 0;" data-i18n="co_export">Экспорт в PDF</button>
+      <div class="lang-switch">
+        <button class="lang-btn active" id="lang_ru">RU</button>
+        <button class="lang-btn" id="lang_uk">UA</button>
       </div>
-      
-      <div class="offer-sections">
-        <!-- Section A: Tech Solution -->
-        <div class="offer-section">
-          <div class="section-title" data-i18n="sec_1">1. Техническое решение</div>
-          <div class="tech-grid">
-            <div class="tech-card">
-              <div class="tc-icon">📐</div>
-              <div class="tc-body">
-                <div class="tc-label" data-i18n="tc_size">Физический размер</div>
-                <div class="tc-val" id="r_size">—</div>
-                <div class="tc-sub" id="r_aspect">—</div>
-              </div>
-            </div>
-            <div class="tech-card">
-              <div class="tc-icon">👁️</div>
-              <div class="tc-body">
-                <div class="tc-label" data-i18n="tc_dist">Качество и дистанция</div>
-                <div class="tc-val" id="r_res">—</div>
-                <div class="tc-sub" id="r_dist">—</div>
-              </div>
-            </div>
-            <div class="tech-card">
-              <div class="tc-icon">⚡</div>
-              <div class="tc-body">
-                <div class="tc-label" data-i18n="tc_power">Энергопотребление</div>
-                <div class="tc-val" id="r_power">—</div>
-                <div class="tc-sub" data-i18n="tc_power_sub">Макс / Средн.</div>
-              </div>
-            </div>
-            <div class="tech-card">
-              <div class="tc-icon">🧩</div>
-              <div class="tc-body">
-                <div class="tc-label" data-i18n="tc_matrix">Сборка экрана</div>
-                <div class="tc-val" id="r_matrix">—</div>
-                <div class="tc-sub" id="r_matrix_sub" data-i18n="tc_matrix_sub">Матрица модулей</div>
-              </div>
+    </header>
+    <nav class="nav-bar">
+      <button class="tab-btn active" data-tab="knowledge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+        <span data-i18n="nav_knowledge">База знаний</span>
+      </button>
+      <button class="tab-btn" data-tab="calc">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="2" width="16" height="20" rx="2" />
+          <line x1="8" y1="6" x2="16" y2="6" />
+          <line x1="8" y1="10" x2="10" y2="10" />
+          <line x1="14" y1="10" x2="16" y2="10" />
+          <line x1="8" y1="14" x2="10" y2="14" />
+          <line x1="14" y1="14" x2="16" y2="14" />
+          <line x1="8" y1="18" x2="16" y2="18" />
+        </svg>
+        <span data-i18n="nav_calc">Калькулятор</span>
+      </button>
+      <button class="tab-btn" data-tab="guide">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+        <span data-i18n="nav_guide">Инструкция настройки</span>
+      </button>
+      <button class="tab-btn" data-tab="admin">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        <span data-i18n="nav_admin">Админка (CMS)</span>
+      </button>
+    </nav>
+    <main class="main" id="mainContent">
+      <!-- KNOWLEDGE BASE -->
+      <section class="section active" id="tab-knowledge">
+        <div class="wiki-layout">
+          <aside class="wiki-sidebar" id="wikiSidebar"></aside>
+          <div class="wiki-content">
+            <div id="wikiContentArea"></div>
+            <div class="wiki-pagination">
+              <button class="wiki-btn hidden" id="wikiPrevBtn"></button>
+              <button class="wiki-btn hidden" id="wikiNextBtn"></button>
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- Section C: Hardware Table -->
-        <div class="offer-section">
-          <div class="section-title" data-i18n="sec_2">2. Спецификация оборудования</div>
-          <table class="receipt-table">
-            <thead>
-              <tr>
-                <th data-i18n="th_name">Наименование</th>
-                <th class="text-center" data-i18n="th_qty">Кол-во</th>
-                <th class="text-right" data-i18n="th_price">Цена (UAH)</th>
-                <th class="text-right" data-i18n="th_sum">Сумма (UAH)</th>
-              </tr>
-            </thead>
-            <tbody id="receipt_body"></tbody>
-            <tfoot>
-              <tr class="receipt-total">
-                <td colspan="3" data-i18n="t_total">ИТОГО ПРОЕКТ:</td>
-                <td class="text-right" id="receipt_total">0 ₴</td>
-              </tr>
-            </tfoot>
-          </table>
+      <!-- CALCULATOR TAB -->
+      <section class="section" id="tab-calc">
+        <div class="page-title" data-i18n="calc_title" style="margin-bottom: 24px;">Смета и расчет проекта</div>
+
+        <div class="calc-wizard">
+          <!-- Блок 1: Исходные данные -->
+          <div class="wizard-step">
+            <div class="step-header">
+              <div class="step-num">1</div>
+              <div class="step-title" data-i18n="step_1">Параметры и габариты</div>
+            </div>
+            <div class="step-body">
+              <div class="form-row-3">
+                <div class="form-group">
+                  <label data-i18n="env_label">Среда использования</label>
+                  <select id="w_env" onchange="window.updateCalc()">
+                    <option value="indoor" data-i18n="env_in">Внутренний (Indoor)</option>
+                    <option value="outdoor" data-i18n="env_out">Уличный (Outdoor)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="width_label">Желаемая ширина (мм)</label>
+                  <input type="number" id="w_width" value="" step="10" min="100" placeholder="Например: 3000"
+                    oninput="window.updateCalc()">
+                </div>
+                <div class="form-group">
+                  <label data-i18n="height_label">Желаемая высота (мм)</label>
+                  <input type="number" id="w_height" value="" step="10" min="100" placeholder="Например: 2000"
+                    oninput="window.updateCalc()">
+                </div>
+              </div>
+              <div class="form-row-1" style="margin-top: 16px;">
+                <label
+                  style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; color:var(--text);"><input
+                    type="checkbox" id="w_two_sides" onchange="window.updateCalc()"
+                    style="width:18px; height:18px;"><span data-i18n="two_sides">2 стороны (Двусторонний)</span></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Блок 2: Оборудование -->
+          <div class="wizard-step">
+            <div class="step-header">
+              <div class="step-num">2</div>
+              <div class="step-title" data-i18n="step_2">Выбор комплектующих</div>
+            </div>
+            <div class="step-body">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label data-i18n="mod_label">Модуль LED</label>
+                  <select id="w_mod" onchange="window.updateCalc()"></select>
+                  <div id="w_mod_hints" class="hint-box"></div>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="ctrl_label">Медиаплеер / Контроллер</label>
+                  <select id="w_ctrl" onchange="window.updateCalc()"></select>
+                  <div id="w_ctrl_hints" class="hint-box"></div>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="psu_label">Блок питания</label>
+                  <select id="w_psu" onchange="window.updateCalc()"></select>
+                  <div id="w_psu_hints" class="hint-box"></div>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="rcard_label">Принимающая карта</label>
+                  <select id="w_rcard" onchange="window.updateCalc()"></select>
+                  <div id="w_rcard_hints" class="hint-box"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Блок 3: Услуги и Наценки -->
+          <div class="wizard-step">
+            <div class="step-header">
+              <div class="step-num">3</div>
+              <div class="step-title" data-i18n="step_3">Услуги и экономика</div>
+            </div>
+            <div class="step-body">
+              <div class="form-row-4">
+                <div class="form-group">
+                  <label data-i18n="frame_label">Каркас (UAH)</label>
+                  <input type="number" id="w_frame" value="0" min="0" oninput="window.updateCalc()">
+                </div>
+                <div class="form-group">
+                  <label data-i18n="delivery_label">Доставка (UAH)</label>
+                  <input type="number" id="w_delivery" value="0" min="0" oninput="window.updateCalc()">
+                </div>
+                <div class="form-group">
+                  <label data-i18n="setup_label">Монтаж / ПНР (UAH)</label>
+                  <input type="number" id="w_setup" value="0" min="0" oninput="window.updateCalc()">
+                </div>
+                <div class="form-group">
+                  <label data-i18n="discount_label">Скидка на ПНР (%)</label>
+                  <input type="number" id="w_discount" value="0" min="0" max="100" oninput="window.updateCalc()">
+                </div>
+              </div>
+              <div class="form-row-2"
+                style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px;">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label data-i18n="usd_label">Курс USD (UAH)</label>
+                  <input type="number" id="w_usd_rate" value="" step="0.1" placeholder="41.5"
+                    oninput="window.updateCalc()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Блок 4: Итоговая смета (Receipt) -->
+          <div class="wizard-receipt" id="printable-offer">
+            <div class="receipt-header">
+              <span data-i18n="co_title">Коммерческое предложение</span>
+              <button class="admin-btn primary small no-print" onclick="window.print()"
+                style="font-size: 13px; padding: 6px 12px; margin: 0;" data-i18n="co_export">Экспорт в PDF</button>
+            </div>
+
+            <div class="offer-sections">
+              <!-- Section A: Tech Solution -->
+              <div class="offer-section">
+                <div class="section-title" data-i18n="sec_1">1. Техническое решение</div>
+                <div class="tech-grid">
+                  <div class="tech-card">
+                    <div class="tc-icon">📐</div>
+                    <div class="tc-body">
+                      <div class="tc-label" data-i18n="tc_size">Физический размер</div>
+                      <div class="tc-val" id="r_size">—</div>
+                      <div class="tc-sub" id="r_aspect">—</div>
+                    </div>
+                  </div>
+                  <div class="tech-card">
+                    <div class="tc-icon">👁️</div>
+                    <div class="tc-body">
+                      <div class="tc-label" data-i18n="tc_dist">Качество и дистанция</div>
+                      <div class="tc-val" id="r_res">—</div>
+                      <div class="tc-sub" id="r_dist">—</div>
+                    </div>
+                  </div>
+                  <div class="tech-card">
+                    <div class="tc-icon">⚡</div>
+                    <div class="tc-body">
+                      <div class="tc-label" data-i18n="tc_power">Энергопотребление</div>
+                      <div class="tc-val" id="r_power">—</div>
+                      <div class="tc-sub" data-i18n="tc_power_sub">Макс / Средн.</div>
+                    </div>
+                  </div>
+                  <div class="tech-card">
+                    <div class="tc-icon">🧩</div>
+                    <div class="tc-body">
+                      <div class="tc-label" data-i18n="tc_matrix">Сборка экрана</div>
+                      <div class="tc-val" id="r_matrix">—</div>
+                      <div class="tc-sub" id="r_matrix_sub" data-i18n="tc_matrix_sub">Матрица модулей</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section C: Hardware Table -->
+              <div class="offer-section">
+                <div class="section-title" data-i18n="sec_2">2. Спецификация оборудования</div>
+                <table class="receipt-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="th_name">Наименование</th>
+                      <th class="text-center" data-i18n="th_qty">Кол-во</th>
+                      <th class="text-right" data-i18n="th_price">Цена (UAH)</th>
+                      <th class="text-right" data-i18n="th_sum">Сумма (UAH)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="receipt_body"></tbody>
+                  <tfoot>
+                    <tr class="receipt-total">
+                      <td colspan="3" data-i18n="t_total">ИТОГО ПРОЕКТ:</td>
+                      <td class="text-right" id="receipt_total">0 ₴</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
-      </div>
-    </div>
+      </section>
 
-  </div>
-</section>
+      <!-- CSS for Wizard -->
+      <style>
+        .calc-wizard {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: var(--shadow);
+          display: flex;
+          flex-direction: column;
+          gap: 32px;
+        }
 
-<!-- CSS for Wizard -->
-<style>
-.calc-wizard {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 32px; box-shadow: var(--shadow);
-  display: flex; flex-direction: column; gap: 32px;
-}
-.wizard-step { display: flex; flex-direction: column; gap: 16px; }
-.step-header { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid var(--bg2); padding-bottom: 8px; }
-.step-num { 
-  background: var(--accent); color: #fff; width: 28px; height: 28px; 
-  display: flex; align-items: center; justify-content: center; 
-  border-radius: 50%; font-weight: 700; font-size: 14px;
-}
-.step-title { font-size: 18px; font-weight: 700; color: var(--text); }
-.step-body { padding-left: 40px; }
+        .wizard-step {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
 
-.form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.form-row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.form-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-@media (max-width: 768px) {
-  .form-row-3, .form-row-2, .form-row-4 { grid-template-columns: 1fr; }
-  .step-body { padding-left: 0; margin-top: 12px; }
-}
+        .step-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          border-bottom: 2px solid var(--bg2);
+          padding-bottom: 8px;
+        }
 
-.hint-box { margin-top: 8px; font-size: 13px; color: var(--text3); background: var(--bg2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); }
+        .step-num {
+          background: var(--accent);
+          color: #fff;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          font-weight: 700;
+          font-size: 14px;
+        }
 
-/* Lang Switch */
-.lang-switch { display: flex; gap: 4px; background: var(--bg2); padding: 4px; border-radius: 8px; margin-left: auto; margin-right: 16px; }
-.lang-btn { background: transparent; border: none; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text3); cursor: pointer; transition: 0.2s; }
-.lang-btn.active { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .step-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--text);
+        }
 
-/* Receipt Section */
-.wizard-receipt {
-  margin-top: 16px; background: #fff; border: 1px solid #e2e8f0;
-  border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-}
-.receipt-header { display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; }
+        .step-body {
+          padding-left: 40px;
+        }
 
-.offer-sections { display: flex; flex-direction: column; gap: 32px; }
-.section-title { font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 16px; }
+        .form-row-3 {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
 
-/* Tech Grid */
-.tech-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-@media (max-width: 1024px) { .tech-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .tech-grid { grid-template-columns: 1fr; } }
-.tech-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; display: flex; gap: 12px; align-items: flex-start; }
-.tc-icon { font-size: 24px; line-height: 1; }
-.tc-label { font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: 600; margin-bottom: 4px; }
-.tc-val { font-size: 18px; font-weight: 800; color: #0ea5e9; font-family: 'JetBrains Mono', monospace; }
-.tc-sub { font-size: 12px; color: #ef4444; margin-top: 4px; font-weight: 500; }
-.tc-sub.ok { color: #10b981; }
+        .form-row-2 {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
 
-/* Table */
-.receipt-table { width: 100%; border-collapse: collapse; }
-.receipt-table th, .receipt-table td { padding: 12px 8px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; }
-.receipt-table th { color: #64748b; text-transform: uppercase; font-size: 11px; text-align: left; font-weight: 600; }
-.text-center { text-align: center !important; }
-.text-right { text-align: right !important; }
-.receipt-total td { font-weight: 800; font-size: 18px; color: #0f172a; border-top: 2px solid #cbd5e1; border-bottom: none; padding-top: 16px; }
-#receipt_total { color: #059669; font-size: 22px; }
-.ri-name { font-weight: 600; color: #0f172a; display: block; }
-.ri-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+        .form-row-4 {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+        }
 
-/* Print Styles */
-@media print {
-  body * { visibility: hidden; }
-  #printable-offer, #printable-offer * { visibility: visible; }
-  #printable-offer { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; padding: 0; }
-  .no-print { display: none !important; }
-  .wizard-receipt { margin-top: 0; }
-  .tech-card { break-inside: avoid; border-color: #cbd5e1; }
-}
-</style>
+        @media (max-width: 768px) {
 
-<script type="module">
-import { DB, loadDB } from './js/data/database.js';
-import { t, dbT, initI18n } from './js/i18n.js';
+          .form-row-3,
+          .form-row-2,
+          .form-row-4 {
+            grid-template-columns: 1fr;
+          }
 
-let currentEnv = 'indoor';
+          .step-body {
+            padding-left: 0;
+            margin-top: 12px;
+          }
+        }
 
-function init() {
-  initI18n(); // Setup language
-  // Removed DB bindings for fixed costs and markup
-  
-  updateLists();
-  window.updateCalc = updateCalc; // Expose to global for onchange
-}
+        .hint-box {
+          margin-top: 8px;
+          font-size: 13px;
+          color: var(--text3);
+          background: var(--bg2);
+          padding: 8px 12px;
+          border-radius: 6px;
+          border-left: 3px solid var(--accent);
+        }
 
-function updateLists() {
-  currentEnv = document.getElementById('w_env').value;
-  
-  // Update Modules
-  const modSelect = document.getElementById('w_mod');
-  const prevMod = modSelect.value;
-  modSelect.innerHTML = '';
-  DB.matrices.filter(m => m.location === currentEnv).forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = `${m.model} (${m.moduleW}x${m.moduleH}mm) - $${m.priceUSD}`;
-    modSelect.appendChild(opt);
-  });
-  if (prevMod && [...modSelect.options].some(o => o.value === prevMod)) {
-    modSelect.value = prevMod;
-  }
-  
-  // Update Controllers
-  const ctrlSelect = document.getElementById('w_ctrl');
-  const prevCtrl = ctrlSelect.value;
-  ctrlSelect.innerHTML = '';
-  DB.controllers.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = `${c.manufacturer} ${c.model} (до ${(c.maxPixels/1000000).toFixed(1)}M px)`;
-    ctrlSelect.appendChild(opt);
-  });
-  if (prevCtrl && [...ctrlSelect.options].some(o => o.value === prevCtrl)) {
-    ctrlSelect.value = prevCtrl;
-  }
-  
-  // Update Power Supplies
-  const psuSelect = document.getElementById('w_psu');
-  const prevPsu = psuSelect.value;
-  psuSelect.innerHTML = '';
-  DB.powerSupplies.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.id;
-    opt.textContent = `${p.model} (${p.watts}W) - $${p.priceUSD}`;
-    psuSelect.appendChild(opt);
-  });
-  if (prevPsu && [...psuSelect.options].some(o => o.value === prevPsu)) {
-    psuSelect.value = prevPsu;
-  }
-  // Update Receiving Cards
-  const rcardSelect = document.getElementById('w_rcard');
-  const prevRcard = rcardSelect.value;
-  rcardSelect.innerHTML = '';
-  DB.receivingCards.forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = r.id;
-    opt.textContent = `${r.model} - $${r.priceUSD}`;
-    rcardSelect.appendChild(opt);
-  });
-  if (prevRcard && [...rcardSelect.options].some(o => o.value === prevRcard)) {
-    rcardSelect.value = prevRcard;
-  }
-  
-  updateCalc();
-}
+        /* Lang Switch */
+        .lang-switch {
+          display: flex;
+          gap: 4px;
+          background: var(--bg2);
+          padding: 4px;
+          border-radius: 8px;
+          margin-left: auto;
+          margin-right: 16px;
+        }
 
-function updateCalc() {
-  // Check if env changed
-  const newEnv = document.getElementById('w_env').value;
-  if (newEnv !== currentEnv) {
-    updateLists();
-    return;
-  }
+        .lang-btn {
+          background: transparent;
+          border: none;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--text3);
+          cursor: pointer;
+          transition: 0.2s;
+        }
 
-  const modId = document.getElementById('w_mod').value;
-  const ctrlId = document.getElementById('w_ctrl').value;
-  const psuId = document.getElementById('w_psu').value;
-  const rcardId = document.getElementById('w_rcard').value;
-  const mod = DB.matrices.find(m => m.id === modId);
-  const ctrl = DB.controllers.find(c => c.id === ctrlId);
-  const psu = DB.powerSupplies.find(p => p.id === psuId);
-  const rcard = DB.receivingCards.find(r => r.id === rcardId);
-  if (!mod || !ctrl || !psu || !rcard) return;
+        .lang-btn.active {
+          background: #fff;
+          color: var(--accent);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
 
-  // Render Hints
-  document.getElementById('w_mod_hints').innerHTML = `<b>Яркость:</b> ${mod.brightness} nits | <b>Защита:</b> ${mod.ip} | <b>Технология:</b> ${mod.technology}`;
-  document.getElementById('w_ctrl_hints').innerHTML = `<b>Тип:</b> ${ctrl.type} | <b>Порты:</b> ${ctrl.ethernetPorts} | <b>Облако:</b> ${ctrl.cloud ? 'Да' : 'Нет'}`;
-  document.getElementById('w_psu_hints').innerHTML = `<b>Мощность:</b> ${psu.watts}W | <b>Запас:</b> ${psu.usageFactor * 100}% | <b>Вольтаж:</b> ${psu.voltage}V`;
-  document.getElementById('w_rcard_hints').innerHTML = `<b>Описание:</b> ${dbT(rcard, 'notes')}`;
+        /* Receipt Section */
+        .wizard-receipt {
+          margin-top: 16px;
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
 
-  // Inputs
-  const w_mm = parseFloat(document.getElementById('w_width').value) || 0;
-  const h_mm = parseFloat(document.getElementById('w_height').value) || 0;
-  const usdRate = parseFloat(document.getElementById('w_usd_rate').value) || 40.0;
-  const markup = 1; // Убрана общая наценка
-  const isTwoSides = document.getElementById('w_two_sides').checked;
-  const sidesMultiplier = isTwoSides ? 2 : 1;
+        .receipt-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 20px;
+          font-weight: 800;
+          color: #0f172a;
+          margin-bottom: 24px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          border-bottom: 2px solid #e2e8f0;
+          padding-bottom: 16px;
+        }
 
-  // Geometry
-  const cols = Math.round(w_mm / mod.moduleW) || 1;
-  const rows = Math.round(h_mm / mod.moduleH) || 1;
-  const totalMods = cols * rows * sidesMultiplier;
-  
-  const realW = cols * mod.moduleW;
-  const realH = rows * mod.moduleH;
-  
-  // Resolution per module (calculate via pitch if not provided in DB)
-  // pixel count = dimension / pitch
-  const modResW = Math.round(mod.moduleW / mod.pitch);
-  const modResH = Math.round(mod.moduleH / mod.pitch);
-  const resW = cols * modResW;
-  const resH = rows * modResH;
-  const totalPx = resW * resH * sidesMultiplier;
+        .offer-sections {
+          display: flex;
+          flex-direction: column;
+          gap: 32px;
+        }
 
-  // Power
-  const maxPwrW = totalMods * mod.maxPowerPerModule;
-  const avgPwrW = maxPwrW * 0.35; // 35% typical
+        .section-title {
+          font-size: 16px;
+          font-weight: 700;
+          color: #334155;
+          margin-bottom: 16px;
+        }
 
-  // Aspect Ratio & Distance
-  const aspectRatio = realW / realH;
-  let aspectText = `Формат ${(aspectRatio).toFixed(2)}:1`;
-  let aspectClass = '';
-  if (aspectRatio >= 1.6 && aspectRatio <= 1.9) {
-    aspectText = t('aspect_ok');
-    aspectClass = 'ok';
-  } else {
-    aspectText = t('aspect_bad');
-  }
+        /* Tech Grid */
+        .tech-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+        }
 
-  const minDist = mod.pitch;
-  const optDist = mod.pitch * 2.5;
+        @media (max-width: 1024px) {
+          .tech-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
 
-  // Update Tech Bar
-  document.getElementById('r_size').textContent = `${(realW/1000).toFixed(2)} × ${(realH/1000).toFixed(2)} м`;
-  
-  const elAspect = document.getElementById('r_aspect');
-  elAspect.textContent = aspectText;
-  elAspect.className = 'tc-sub ' + aspectClass;
+        @media (max-width: 640px) {
+          .tech-grid {
+            grid-template-columns: 1fr;
+          }
+        }
 
-  document.getElementById('r_res').textContent = `${resW} × ${resH} px`;
-  document.getElementById('r_dist').textContent = `${t('opt_dist')} ${optDist.toFixed(1)} м`;
-  
-  document.getElementById('r_power').textContent = `${(maxPwrW/1000).toFixed(1)} / ${(avgPwrW/1000).toFixed(1)} кВт`;
+        .tech-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 16px;
+          display: flex;
+          gap: 12px;
+          align-items: flex-start;
+        }
 
-  // Cabinet approximation
-  const modsPerCabW = Math.round(mod.cabinetW / mod.moduleW) || 1;
-  const modsPerCabH = Math.round(mod.cabinetH / mod.moduleH) || 1;
-  const cabCols = Math.ceil(cols / modsPerCabW);
-  const cabRows = Math.ceil(rows / modsPerCabH);
-  const totalCabs = cabCols * cabRows * sidesMultiplier;
+        .tc-icon {
+          font-size: 24px;
+          line-height: 1;
+        }
 
-  // Draw Matrix stats
-  const elMatrix = document.getElementById('r_matrix');
-  elMatrix.textContent = `${cols} × ${rows} ${isTwoSides ? '(x2) ' : ''}(${totalMods} ${t('pcs')})`;
-  
-  const elMatrixSub = document.getElementById('r_matrix_sub');
-  elMatrixSub.textContent = `~ ${totalCabs} кабинетов (${cabCols}×${cabRows})`;
-  elMatrixSub.style.color = 'var(--text)';
-  elMatrixSub.style.fontWeight = '600';
+        .tc-label {
+          font-size: 12px;
+          text-transform: uppercase;
+          color: #64748b;
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
 
-  // Hardware Quantities
-  const psuW = psu.watts * psu.usageFactor;
-  const psuCount = Math.ceil(maxPwrW / psuW) || 1;
-  
-  // Calculation of receiving cards by HUB ports and pixel limits
-  // (modResW and modResH are already calculated above)
-  const maxPxW = rcard.maxPxW || 256;
-  const maxPxH = rcard.maxPxH || 256;
-  const hubPorts = rcard.hubPorts || 8;
+        .tc-val {
+          font-size: 18px;
+          font-weight: 800;
+          color: #0ea5e9;
+          font-family: 'JetBrains Mono', monospace;
+        }
 
-  // 1 port (HUB) drives 1 row of modules. How many modules can 1 port drive without exceeding maxPxW?
-  const colsPerPort = Math.floor(maxPxW / modResW) || 1;
-  const cardsForWidth = Math.ceil(cols / colsPerPort);
+        .tc-sub {
+          font-size: 12px;
+          color: #ef4444;
+          margin-top: 4px;
+          font-weight: 500;
+        }
 
-  // How many rows of modules can 1 card drive?
-  // It is limited by the physical number of ports (hubPorts) AND the pixel height limit (maxPxH / modResH)
-  const maxRowsByPixels = Math.floor(maxPxH / modResH) || 1;
-  const rowsPerCard = Math.min(hubPorts, maxRowsByPixels);
-  const cardsForHeight = Math.ceil(rows / rowsPerCard);
+        .tc-sub.ok {
+          color: #10b981;
+        }
 
-  // Total cards per 1 side
-  const cardsPerSide = cardsForWidth * cardsForHeight;
-  
-  // Total cards for all sides
-  const rCardCount = cardsPerSide * sidesMultiplier;
+        /* Table */
+        .receipt-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
 
-  // Prices UAH with markup
-  const toUAH = (usd) => (usd * usdRate * markup);
-  const pMod = toUAH(mod.priceUSD);
-  const pPsu = toUAH(psu.priceUSD);
-  const pRCard = toUAH(rcard.priceUSD);
-  const pCtrl = toUAH(ctrl.priceUSD);
+        .receipt-table th,
+        .receipt-table td {
+          padding: 12px 8px;
+          border-bottom: 1px solid #e2e8f0;
+          font-size: 14px;
+          color: #334155;
+        }
 
-  // Sums
-  const sMod = pMod * totalMods;
-  const sPsu = pPsu * psuCount;
-  const sRCard = pRCard * rCardCount;
+        .receipt-table th {
+          color: #64748b;
+          text-transform: uppercase;
+          font-size: 11px;
+          text-align: left;
+          font-weight: 600;
+        }
 
-  const frameUAH = (parseFloat(document.getElementById('w_frame').value) || 0) * markup;
-  const delivUAH = (parseFloat(document.getElementById('w_delivery').value) || 0) * markup;
-  const setupRaw = (parseFloat(document.getElementById('w_setup').value) || 0) * markup;
-  const discPercent = parseFloat(document.getElementById('w_discount').value) || 0;
-  const discUAH = Math.round(setupRaw * (discPercent / 100));
-  const setupUAH = Math.max(0, Math.round(setupRaw - discUAH));
+        .text-center {
+          text-align: center !important;
+        }
 
-  const total = sMod + sPsu + sRCard + pCtrl + frameUAH + delivUAH + setupUAH;
+        .text-right {
+          text-align: right !important;
+        }
 
-  // Render Table
-  let html = '';
-  function tr(name, desc, qty, price, sum) {
-    if (qty > 0 || sum > 0) {
-      html += `<tr>
+        .receipt-total td {
+          font-weight: 800;
+          font-size: 18px;
+          color: #0f172a;
+          border-top: 2px solid #cbd5e1;
+          border-bottom: none;
+          padding-top: 16px;
+        }
+
+        #receipt_total {
+          color: #059669;
+          font-size: 22px;
+        }
+
+        .ri-name {
+          font-weight: 600;
+          color: #0f172a;
+          display: block;
+        }
+
+        .ri-desc {
+          font-size: 12px;
+          color: #64748b;
+          margin-top: 2px;
+        }
+
+        /* Print Styles */
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+
+          #printable-offer,
+          #printable-offer * {
+            visibility: visible;
+          }
+
+          #printable-offer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+          }
+
+          .no-print {
+            display: none !important;
+          }
+
+          .wizard-receipt {
+            margin-top: 0;
+          }
+
+          .tech-card {
+            break-inside: avoid;
+            border-color: #cbd5e1;
+          }
+        }
+      </style>
+
+      <script type="module">
+        import { DB, loadDB } from './js/data/database.js';
+        import { t, dbT, initI18n } from './js/i18n.js';
+
+        let currentEnv = 'indoor';
+
+        function init() {
+          initI18n(); // Setup language
+          // Removed DB bindings for fixed costs and markup
+
+          updateLists();
+          window.updateCalc = updateCalc; // Expose to global for onchange
+        }
+
+        function updateLists() {
+          currentEnv = document.getElementById('w_env').value;
+
+          // Update Modules
+          const modSelect = document.getElementById('w_mod');
+          const prevMod = modSelect.value;
+          modSelect.innerHTML = '';
+          DB.matrices.filter(m => m.location === currentEnv).forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = `${m.model} (${m.moduleW}x${m.moduleH}mm) - $${m.priceUSD}`;
+            modSelect.appendChild(opt);
+          });
+          if (prevMod && [...modSelect.options].some(o => o.value === prevMod)) {
+            modSelect.value = prevMod;
+          }
+
+          // Update Controllers
+          const ctrlSelect = document.getElementById('w_ctrl');
+          const prevCtrl = ctrlSelect.value;
+          ctrlSelect.innerHTML = '';
+          DB.controllers.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `${c.manufacturer} ${c.model} (до ${(c.maxPixels / 1000000).toFixed(1)}M px)`;
+            ctrlSelect.appendChild(opt);
+          });
+          if (prevCtrl && [...ctrlSelect.options].some(o => o.value === prevCtrl)) {
+            ctrlSelect.value = prevCtrl;
+          }
+
+          // Update Power Supplies
+          const psuSelect = document.getElementById('w_psu');
+          const prevPsu = psuSelect.value;
+          psuSelect.innerHTML = '';
+          DB.powerSupplies.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.model} (${p.watts}W) - $${p.priceUSD}`;
+            psuSelect.appendChild(opt);
+          });
+          if (prevPsu && [...psuSelect.options].some(o => o.value === prevPsu)) {
+            psuSelect.value = prevPsu;
+          }
+          // Update Receiving Cards
+          const rcardSelect = document.getElementById('w_rcard');
+          const prevRcard = rcardSelect.value;
+          rcardSelect.innerHTML = '';
+          DB.receivingCards.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            opt.textContent = `${r.model} - $${r.priceUSD}`;
+            rcardSelect.appendChild(opt);
+          });
+          if (prevRcard && [...rcardSelect.options].some(o => o.value === prevRcard)) {
+            rcardSelect.value = prevRcard;
+          }
+
+          updateCalc();
+        }
+
+        function updateCalc() {
+          // Check if env changed
+          const newEnv = document.getElementById('w_env').value;
+          if (newEnv !== currentEnv) {
+            updateLists();
+            return;
+          }
+
+          const modId = document.getElementById('w_mod').value;
+          const ctrlId = document.getElementById('w_ctrl').value;
+          const psuId = document.getElementById('w_psu').value;
+          const rcardId = document.getElementById('w_rcard').value;
+          const mod = DB.matrices.find(m => m.id === modId);
+          const ctrl = DB.controllers.find(c => c.id === ctrlId);
+          const psu = DB.powerSupplies.find(p => p.id === psuId);
+          const rcard = DB.receivingCards.find(r => r.id === rcardId);
+          if (!mod || !ctrl || !psu || !rcard) return;
+
+          // Render Hints
+          document.getElementById('w_mod_hints').innerHTML = `<b>Яркость:</b> ${mod.brightness} nits | <b>Защита:</b> ${mod.ip} | <b>Технология:</b> ${mod.technology}`;
+          document.getElementById('w_ctrl_hints').innerHTML = `<b>Тип:</b> ${ctrl.type} | <b>Порты:</b> ${ctrl.ethernetPorts} | <b>Облако:</b> ${ctrl.cloud ? 'Да' : 'Нет'}`;
+          document.getElementById('w_psu_hints').innerHTML = `<b>Мощность:</b> ${psu.watts}W | <b>Запас:</b> ${psu.usageFactor * 100}% | <b>Вольтаж:</b> ${psu.voltage}V`;
+          document.getElementById('w_rcard_hints').innerHTML = `<b>Описание:</b> ${dbT(rcard, 'notes')}`;
+
+          // Inputs
+          const w_mm = parseFloat(document.getElementById('w_width').value) || 0;
+          const h_mm = parseFloat(document.getElementById('w_height').value) || 0;
+          const usdRate = parseFloat(document.getElementById('w_usd_rate').value) || 40.0;
+          const markup = 1; // Убрана общая наценка
+          const isTwoSides = document.getElementById('w_two_sides').checked;
+          const sidesMultiplier = isTwoSides ? 2 : 1;
+
+          // Geometry
+          const cols = Math.round(w_mm / mod.moduleW) || 1;
+          const rows = Math.round(h_mm / mod.moduleH) || 1;
+          const totalMods = cols * rows * sidesMultiplier;
+
+          const realW = cols * mod.moduleW;
+          const realH = rows * mod.moduleH;
+
+          // Resolution per module (calculate via pitch if not provided in DB)
+          // pixel count = dimension / pitch
+          const modResW = Math.round(mod.moduleW / mod.pitch);
+          const modResH = Math.round(mod.moduleH / mod.pitch);
+          const resW = cols * modResW;
+          const resH = rows * modResH;
+          const totalPx = resW * resH * sidesMultiplier;
+
+          // Power
+          const maxPwrW = totalMods * mod.maxPowerPerModule;
+          const avgPwrW = maxPwrW * 0.35; // 35% typical
+
+          // Aspect Ratio & Distance
+          const aspectRatio = realW / realH;
+          let aspectText = `Формат ${(aspectRatio).toFixed(2)}:1`;
+          let aspectClass = '';
+          if (aspectRatio >= 1.6 && aspectRatio <= 1.9) {
+            aspectText = t('aspect_ok');
+            aspectClass = 'ok';
+          } else {
+            aspectText = t('aspect_bad');
+          }
+
+          const minDist = mod.pitch;
+          const optDist = mod.pitch * 2.5;
+
+          // Update Tech Bar
+          document.getElementById('r_size').textContent = `${(realW / 1000).toFixed(2)} × ${(realH / 1000).toFixed(2)} м`;
+
+          const elAspect = document.getElementById('r_aspect');
+          elAspect.textContent = aspectText;
+          elAspect.className = 'tc-sub ' + aspectClass;
+
+          document.getElementById('r_res').textContent = `${resW} × ${resH} px`;
+          document.getElementById('r_dist').textContent = `${t('opt_dist')} ${optDist.toFixed(1)} м`;
+
+          document.getElementById('r_power').textContent = `${(maxPwrW / 1000).toFixed(1)} / ${(avgPwrW / 1000).toFixed(1)} кВт`;
+
+          // Cabinet approximation
+          const modsPerCabW = Math.round(mod.cabinetW / mod.moduleW) || 1;
+          const modsPerCabH = Math.round(mod.cabinetH / mod.moduleH) || 1;
+          const cabCols = Math.ceil(cols / modsPerCabW);
+          const cabRows = Math.ceil(rows / modsPerCabH);
+          const totalCabs = cabCols * cabRows * sidesMultiplier;
+
+          // Draw Matrix stats
+          const elMatrix = document.getElementById('r_matrix');
+          elMatrix.textContent = `${cols} × ${rows} ${isTwoSides ? '(x2) ' : ''}(${totalMods} ${t('pcs')})`;
+
+          const elMatrixSub = document.getElementById('r_matrix_sub');
+          elMatrixSub.textContent = `~ ${totalCabs} кабинетов (${cabCols}×${cabRows})`;
+          elMatrixSub.style.color = 'var(--text)';
+          elMatrixSub.style.fontWeight = '600';
+
+          // Hardware Quantities
+          const psuW = psu.watts * psu.usageFactor;
+          const psuCount = Math.ceil(maxPwrW / psuW) || 1;
+
+          // Calculation of receiving cards by HUB ports and pixel limits
+          // (modResW and modResH are already calculated above)
+          const maxPxW = rcard.maxPxW || 256;
+          const maxPxH = rcard.maxPxH || 256;
+          const hubPorts = rcard.hubPorts || 8;
+
+          // 1 port (HUB) drives 1 row of modules. How many modules can 1 port drive without exceeding maxPxW?
+          const colsPerPort = Math.floor(maxPxW / modResW) || 1;
+          const cardsForWidth = Math.ceil(cols / colsPerPort);
+
+          // How many rows of modules can 1 card drive?
+          // It is limited by the physical number of ports (hubPorts) AND the pixel height limit (maxPxH / modResH)
+          const maxRowsByPixels = Math.floor(maxPxH / modResH) || 1;
+          const rowsPerCard = Math.min(hubPorts, maxRowsByPixels);
+          const cardsForHeight = Math.ceil(rows / rowsPerCard);
+
+          // Total cards per 1 side
+          const cardsPerSide = cardsForWidth * cardsForHeight;
+
+          // Total cards for all sides
+          const rCardCount = cardsPerSide * sidesMultiplier;
+
+          // Prices UAH with markup
+          const toUAH = (usd) => (usd * usdRate * markup);
+          const pMod = toUAH(mod.priceUSD);
+          const pPsu = toUAH(psu.priceUSD);
+          const pRCard = toUAH(rcard.priceUSD);
+          const pCtrl = toUAH(ctrl.priceUSD);
+
+          // Sums//
+          const sMod = pMod * totalMods;
+          const sPsu = pPsu * psuCount;
+          const sRCard = pRCard * rCardCount;
+
+          const frameUAH = (parseFloat(document.getElementById('w_frame').value) || 0) * markup;
+          const delivUAH = (parseFloat(document.getElementById('w_delivery').value) || 0) * markup;
+          const setupRaw = (parseFloat(document.getElementById('w_setup').value) || 0) * markup;
+          const discPercent = parseFloat(document.getElementById('w_discount').value) || 0;
+          const discUAH = Math.round(setupRaw * (discPercent / 100));
+          const setupUAH = Math.max(0, Math.round(setupRaw - discUAH));
+
+          const total = sMod + sPsu + sRCard + pCtrl + frameUAH + delivUAH + setupUAH;
+          //
+          // Render Table
+          let html = '';
+          function tr(name, desc, qty, price, sum) {
+            if (qty > 0 || sum > 0) {
+              html += `<tr>
         <td><span class="ri-name">${name}</span><span class="ri-desc">${desc}</span></td>
         <td class="text-center">${qty} ${t('pcs')}</td>
         <td class="text-right">${Math.round(price).toLocaleString('ru')}</td>
         <td class="text-right"><b>${Math.round(sum).toLocaleString('ru')}</b></td>
       </tr>`;
-    }
-  }
+            }
+          }
 
-  html += `<tr><td colspan="4" style="background:#f8fafc; padding:6px 12px; font-weight:700; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">${t('mat_title')}</td></tr>`;
-  
-  tr(t('mod_title'), `${mod.model} (${mod.moduleW}x${mod.moduleH})`, totalMods, pMod, sMod);
-  tr(t('psu_title'), `${psu.model} — ${dbT(psu, 'notes')}`, psuCount, pPsu, sPsu);
-  tr(t('rcard_title'), `${rcard.model} — ${dbT(rcard, 'notes')}`, rCardCount, pRCard, sRCard);
-  
-  const ctrlDesc = `${ctrl.manufacturer} ${ctrl.model} — ${dbT(ctrl, 'bestUse')}`;
-  tr(t('ctrl_title'), ctrlDesc, 1, pCtrl, pCtrl);
-  
-  if (frameUAH > 0 || delivUAH > 0 || setupRaw > 0) {
-    html += `<tr><td colspan="4" style="background:#f8fafc; padding:6px 12px; font-weight:700; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.5px; border-top:2px solid #e2e8f0;">${t('srv_title')}</td></tr>`;
-  }
-  
-  if (frameUAH > 0) tr(t('frame_title'), t('frame_desc'), 1, frameUAH, frameUAH);
-  if (delivUAH > 0) tr(t('deliv_title'), t('deliv_desc'), 1, delivUAH, delivUAH);
-  if (setupRaw > 0) {
-    const dStr = discPercent > 0 ? ` (${t('discount_txt')} -${discPercent}%)` : '';
-    tr(t('setup_title'), t('setup_desc') + dStr, 1, setupUAH, setupUAH);
-  }
+          html += `<tr><td colspan="4" style="background:#f8fafc; padding:6px 12px; font-weight:700; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">${t('mat_title')}</td></tr>`;
 
-  document.getElementById('receipt_body').innerHTML = html;
-  document.getElementById('receipt_total').textContent = Math.round(total).toLocaleString('ru') + ' ₴';
-}
+          tr(t('mod_title'), `${mod.model} (${mod.moduleW}x${mod.moduleH})`, totalMods, pMod, sMod);
+          tr(t('psu_title'), `${psu.model} — ${dbT(psu, 'notes')}`, psuCount, pPsu, sPsu);
+          tr(t('rcard_title'), `${rcard.model} — ${dbT(rcard, 'notes')}`, rCardCount, pRCard, sRCard);
 
-loadDB().then(() => {
-  init();
-});
-</script>
-<!-- GUIDE TAB -->
-<section class="section" id="tab-guide">
-  <div class="page-title">Инструкция настройки</div>
-  <div class="wip-card">
-    <div class="wip-icon">🚧</div>
-    <div class="wip-title">Раздел в разработке</div>
-    <div class="wip-desc">Здесь будет размещена подробная пошаговая инструкция по настройке контроллеров (например, Novastar NovaLCT), калибровке и пусконаладке оборудования.</div>
-  </div>
-</section>
+          const ctrlDesc = `${ctrl.manufacturer} ${ctrl.model} — ${dbT(ctrl, 'bestUse')}`;
+          tr(t('ctrl_title'), ctrlDesc, 1, pCtrl, pCtrl);
 
-<!-- ADMIN TAB -->
-<section class="section" id="tab-admin">
-  <div class="page-title">Управление базой данных (GitHub CMS)</div>
-  <div id="admin-app"></div>
-</section>
+          if (frameUAH > 0 || delivUAH > 0 || setupRaw > 0) {
+            html += `<tr><td colspan="4" style="background:#f8fafc; padding:6px 12px; font-weight:700; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.5px; border-top:2px solid #e2e8f0;">${t('srv_title')}</td></tr>`;
+          }
 
-</main>
+          if (frameUAH > 0) tr(t('frame_title'), t('frame_desc'), 1, frameUAH, frameUAH);
+          if (delivUAH > 0) tr(t('deliv_title'), t('deliv_desc'), 1, delivUAH, delivUAH);
+          if (setupRaw > 0) {
+            const dStr = discPercent > 0 ? ` (${t('discount_txt')} -${discPercent}%)` : '';
+            tr(t('setup_title'), t('setup_desc') + dStr, 1, setupUAH, setupUAH);
+          }
 
-<script type="module" src="js/app.js?v=2"></script>
-<script type="module" src="js/admin.js?v=8"></script>
-<script>
+          document.getElementById('receipt_body').innerHTML = html;
+          document.getElementById('receipt_total').textContent = Math.round(total).toLocaleString('ru') + ' ₴';
+        }
 
-// Calculators
-function calcResolution() {
-  const w = parseFloat(document.getElementById('c1w').value);
-  const h = parseFloat(document.getElementById('c1h').value);
-  const p = parseFloat(document.getElementById('c1p').value);
-  if (!w || !h || !p) return;
-  const pw = Math.round(w / p);
-  const ph = Math.round(h / p);
-  const total = pw * ph;
-  const dens = Math.round(total / ((w/1000) * (h/1000)));
-  const dist = (p * 1.0).toFixed(1);
-  document.getElementById('r1res').textContent = `${pw} × ${ph} px`;
-  document.getElementById('r1total').textContent = total.toLocaleString('ru') + ' пикс.';
-  document.getElementById('r1dens').textContent = dens.toLocaleString('ru') + ' пикс./м²';
-  document.getElementById('r1dist').textContent = dist + ' м';
-  document.getElementById('r1').classList.add('show');
-}
+        loadDB().then(() => {
+          init();
+        });
+      </script>
+      <!-- GUIDE TAB -->
+      <section class="section" id="tab-guide">
+        <div class="page-title">Инструкция настройки</div>
+        <div class="wip-card">
+          <div class="wip-icon">🚧</div>
+          <div class="wip-title">Раздел в разработке</div>
+          <div class="wip-desc">Здесь будет размещена подробная пошаговая инструкция по настройке контроллеров
+            (например, Novastar NovaLCT), калибровке и пусконаладке оборудования.</div>
+        </div>
+      </section>
 
-function calcPower() {
-  const area = parseFloat(document.getElementById('c2area').value);
-  const type = document.getElementById('c2type').value;
-  const load = parseFloat(document.getElementById('c2load').value) / 100;
-  const map = { outdoor: 450, indoor: 300, rental: 380, fine: 500 };
-  const wpm2 = map[type];
-  const maxW = area * wpm2;
-  const workW = maxW * load;
-  const amps = (workW / 220).toFixed(1);
-  const psus = Math.ceil(workW / 300);
-  const kwh = ((workW * 12) / 1000).toFixed(1);
-  document.getElementById('r2max').textContent = Math.round(maxW).toLocaleString('ru') + ' Вт';
-  document.getElementById('r2work').textContent = Math.round(workW).toLocaleString('ru') + ' Вт';
-  document.getElementById('r2amp').textContent = amps + ' А';
-  document.getElementById('r2psu').textContent = psus + ' шт.';
-  document.getElementById('r2kwh').textContent = kwh + ' кВт·ч';
-  document.getElementById('r2').classList.add('show');
-}
+      <!-- ADMIN TAB -->
+      <section class="section" id="tab-admin">
+        <div class="page-title">Управление базой данных (GitHub CMS)</div>
+        <div id="admin-app"></div>
+      </section>
 
-function calcPitch() {
-  const dist = parseFloat(document.getElementById('c3dist').value);
-  const env = document.getElementById('c3env').value;
-  const mult = { indoor: 1.0, outdoor: 1.4, stage: 0.9 };
-  const k = mult[env];
-  const rec = (dist / k).toFixed(1);
-  const max = (dist / (k * 0.7)).toFixed(1);
-  const p4k = (4000 / 3840).toFixed(2);
-  document.getElementById('r3pitch').textContent = `P${rec} мм`;
-  document.getElementById('r3max').textContent = `P${max} мм`;
-  document.getElementById('r3_4k').textContent = `P${p4k} мм`;
-  document.getElementById('r3').classList.add('show');
-}
+    </main>
 
-function calcCabinets() {
-  const sw = parseFloat(document.getElementById('c4sw').value);
-  const sh = parseFloat(document.getElementById('c4sh').value);
-  const cw = parseFloat(document.getElementById('c4cw').value);
-  const ch = parseFloat(document.getElementById('c4ch').value);
-  const cols = Math.round(sw / cw);
-  const rows = Math.round(sh / ch);
-  const total = cols * rows;
-  const rw = (cols * cw / 1000).toFixed(2);
-  const rh = (rows * ch / 1000).toFixed(2);
-  const area = (rw * rh).toFixed(2);
-  document.getElementById('r4cw').textContent = cols + ' шт.';
-  document.getElementById('r4ch').textContent = rows + ' шт.';
-  document.getElementById('r4total').textContent = total + ' шт.';
-  document.getElementById('r4real').textContent = `${rw} × ${rh} м`;
-  document.getElementById('r4area').textContent = area + ' м²';
-  document.getElementById('r4').classList.add('show');
-}
-</script>
-</body>
-</html>
+    <script type="module" src="js/app.js?v=2"></script>
+    <script type="module" src="js/admin.js?v=8"></script>
+    <script>
+
+      // Calculators
+      function calcResolution() {
+        const w = parseFloat(document.getElementById('c1w').value);
+        const h = parseFloat(document.getElementById('c1h').value);
+        const p = parseFloat(document.getElementById('c1p').value);
+        if (!w || !h || !p) return;
+        const pw = Math.round(w / p);
+        const ph = Math.round(h / p);
+        const total = pw * ph;
+        const dens = Math.round(total / ((w / 1000) * (h / 1000)));
+        const dist = (p * 1.0).toFixed(1);
+        document.getElementById('r1res').textContent = `${pw} × ${ph} px`;
+        document.getElementById('r1total').textContent = total.toLocaleString('ru') + ' пикс.';
+        document.getElementById('r1dens').textContent = dens.toLocaleString('ru') + ' пикс./м²';
+        document.getElementById('r1dist').textContent = dist + ' м';
+        document.getElementById('r1').classList.add('show');
+      }
+
+      function calcPower() {
+        const area = parseFloat(document.getElementById('c2area').value);
+        const type = document.getElementById('c2type').value;
+        const load = parseFloat(document.getElementById('c2load').value) / 100;
+        const map = { outdoor: 450, indoor: 300, rental: 380, fine: 500 };
+        const wpm2 = map[type];
+        const maxW = area * wpm2;
+        const workW = maxW * load;
+        const amps = (workW / 220).toFixed(1);
+        const psus = Math.ceil(workW / 300);
+        const kwh = ((workW * 12) / 1000).toFixed(1);
+        document.getElementById('r2max').textContent = Math.round(maxW).toLocaleString('ru') + ' Вт';
+        document.getElementById('r2work').textContent = Math.round(workW).toLocaleString('ru') + ' Вт';
+        document.getElementById('r2amp').textContent = amps + ' А';
+        document.getElementById('r2psu').textContent = psus + ' шт.';
+        document.getElementById('r2kwh').textContent = kwh + ' кВт·ч';
+        document.getElementById('r2').classList.add('show');
+      }
+
+      function calcPitch() {
+        const dist = parseFloat(document.getElementById('c3dist').value);
+        const env = document.getElementById('c3env').value;
+        const mult = { indoor: 1.0, outdoor: 1.4, stage: 0.9 };
+        const k = mult[env];
+        const rec = (dist / k).toFixed(1);
+        const max = (dist / (k * 0.7)).toFixed(1);
+        const p4k = (4000 / 3840).toFixed(2);
+        document.getElementById('r3pitch').textContent = `P${rec} мм`;
+        document.getElementById('r3max').textContent = `P${max} мм`;
+        document.getElementById('r3_4k').textContent = `P${p4k} мм`;
+        document.getElementById('r3').classList.add('show');
+      }
+
+      function calcCabinets() {
+        const sw = parseFloat(document.getElementById('c4sw').value);
+        const sh = parseFloat(document.getElementById('c4sh').value);
+        const cw = parseFloat(document.getElementById('c4cw').value);
+        const ch = parseFloat(document.getElementById('c4ch').value);
+        const cols = Math.round(sw / cw);
+        const rows = Math.round(sh / ch);
+        const total = cols * rows;
+        const rw = (cols * cw / 1000).toFixed(2);
+        const rh = (rows * ch / 1000).toFixed(2);
+        const area = (rw * rh).toFixed(2);
+        document.getElementById('r4cw').textContent = cols + ' шт.';
+        document.getElementById('r4ch').textContent = rows + ' шт.';
+        document.getElementById('r4total').textContent = total + ' шт.';
+        document.getElementById('r4real').textContent = `${rw} × ${rh} м`;
+        document.getElementById('r4area').textContent = area + ' м²';
+        document.getElementById('r4').classList.add('show');
+      }
+    </script>
+  </body>
+
+  </html>
