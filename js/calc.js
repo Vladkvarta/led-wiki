@@ -255,16 +255,7 @@
                 });
                 visualHtml += `</div>`;
             });
-            
-            let psuWarnStyle = maxModsPerPsu < 6 ? 'color:#ef4444;' : 'color:#059669;';
-            let psuWarnIcon = maxModsPerPsu < 6 ? '⚠️' : '✅';
-            let psuWarnText = maxModsPerPsu < 6 
-                ? `Блок питания слабоват. Схема пересчитана на лимит ${maxModsPerPsu} мод. на 1 БП.` 
-                : `Оптимальная нагрузка: до ${maxModsPerPsu} мод. на 1 БП.`;
-
-            visualHtml += `<div style="margin-top:12px; padding-top:8px; border-top:1px dashed #cbd5e1; font-size:12px; font-weight:600; ${psuWarnStyle}">`;
-            visualHtml += `${psuWarnIcon} Распределение питания: ${psuWarnText} (Запас мощности 20%)`;
-            visualHtml += `</div></div>`;
+            visualHtml += `</div>`;
             visualEl.innerHTML = visualHtml;
           } else {
             visualEl.innerHTML = '';
