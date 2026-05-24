@@ -175,8 +175,8 @@
       "cabinetW": 960,
       "cabinetH": 960,
       "voltage": 5,
-      "maxPowerPerModule": 22,
-      "priceUSD": 14.5,
+      "maxPowerPerModule": 40,
+      "priceUSD": 22,
       "fps": 60,
       "refreshHz": 1920,
       "hdr": false,
@@ -569,10 +569,10 @@
     {
       "id": "rc_5a75b",
       "model": "Colorlight 5A-75B",
-      "priceUSD": 14,
+      "priceUSD": 13,
       "notes_ru": "Интегрированный HUB75, нагрузка до 256x256 px",
       "notes_uk": "Інтегрований HUB75, навантаження до 256x256 px",
-      "hubPorts": 16,
+      "hubPorts": 8,
       "maxPxW": 256,
       "maxPxH": 256
     }
