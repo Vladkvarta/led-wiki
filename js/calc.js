@@ -243,11 +243,6 @@
           elMatrixSub.style.color = '#64748b';
           elMatrixSub.style.fontWeight = '500';
 
-          const elMatrixPx = document.getElementById('r_matrix_px');
-          if (elMatrixPx) {
-            elMatrixPx.textContent = `${resW.toLocaleString('ru')} × ${resH.toLocaleString('ru')} px`;
-          }
-
           // Render Visual Grid
           const visualEl = document.getElementById('cabinet_visual');
           if (wDist.length > 0 && hDist.length > 0) {
