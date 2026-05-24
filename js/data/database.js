@@ -7,13 +7,23 @@ export let DB = null;
 
 export async function loadDB() {
   try {
-    // Добавляем timestamp для сброса кэша браузера при каждом запросе
-    const response = await fetch(`database.json?t=${new Date().getTime()}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    let response;
+    let dbName = 'database.local.json';
+    try {
+      // Пытаемся загрузить локальную базу (игнорируется в git)
+      response = await fetch(`database.local.json?t=${new Date().getTime()}`);
+      if (!response.ok) throw new Error('No local');
+    } catch (e) {
+      // Если локальной нет, грузим серверную
+      dbName = 'database.json';
+      response = await fetch(`database.json?t=${new Date().getTime()}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
     }
+    
     DB = await response.json();
-    console.log('Database loaded from database.json');
+    console.log(`Database loaded from ${dbName}`);
     return DB;
   } catch (error) {
     console.error('Failed to load database:', error);
