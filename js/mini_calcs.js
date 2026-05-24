@@ -68,3 +68,33 @@
         document.getElementById('r4').classList.add('show');
       }
 
+      window.calcPorts = function() {
+        const limitsMap = {
+          '655360': 655360,
+          '327680': 327680,
+          '327680_hdr': 327680,
+          '163840': 163840
+        };
+        const wEl = document.getElementById('width-sl');
+        const hEl = document.getElementById('height-sl');
+        const modeSel = document.getElementById('mode-sel');
+        if (!wEl || !hEl || !modeSel) return;
+        
+        const w = parseInt(wEl.value) || 0;
+        const h = parseInt(hEl.value) || 0;
+        const mode = modeSel.value;
+        const limit = limitsMap[mode] || 655360;
+        const totalPx = w * h;
+        
+        const portsTheory = Math.ceil(totalPx / limit);
+        const portsSafe = Math.ceil(totalPx / (limit * 0.85));
+
+        const wOut = document.getElementById('width-out');
+        if (wOut) wOut.innerText = w;
+        const hOut = document.getElementById('height-out');
+        if (hOut) hOut.innerText = h;
+
+        document.getElementById('total-px').innerText = totalPx.toLocaleString('ru');
+        document.getElementById('ports-theory').innerText = portsTheory;
+        document.getElementById('ports-out').innerText = portsSafe;
+      };

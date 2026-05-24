@@ -1,63 +1,71 @@
 export const section = {
   id: "module-manufacturers",
   icon: "🏭",
-  title: "Производители матриц/модулей",
+  title: "Интеграторы и OEM-производители (Сборка)",
   content: `
 
-        <div class="section-label">Кто такие производители модулей?</div>
-        <div class="card" style="margin-bottom: 24px;">
-          <p><strong>Сборщики матриц (Модулей)</strong> — это заводы, которые закупают диоды (например, Nationstar), микросхемы (IC-драйверы), печатают платы (PCB) и собирают всё это в готовый пластиковый блок. От них зависит геометрия, качество пайки, жесткость пластика и финальная картинка.</p>
+        <div class=\"info-box info-blue\" style=\"margin-bottom:20px\">
+          <strong>Инженерная сводка:</strong> Завод-интегратор не производит диоды, он формирует <strong>BOM (Bill of Materials)</strong> — спецификацию комплектующих. Качество конечного экрана зависит от уровня SMT-линий (станков поверхностного монтажа), геометрии пластиковых шасси, слойности печатных плат (PCB) и наличия заводской оптической калибровки.
         </div>
 
-        <div class="section-label">Уровни брендов (Tier-сегментация)</div>
-        <div class="grid-2" style="margin-bottom:24px">
+        <div class=\"section-label\">Архитектура производства: На что влияет сборка</div>
+        <div class=\"card\" style=\"margin-bottom: 24px;\">
+          <ul style=\"margin-top:0; font-size: 14px; padding-left:16px; display:flex; flex-direction:column; gap:12px;\">
+            <li><strong>Печатная плата (PCB):</strong> Определяет термоотвод и стабильность сигнала. Дешевые модули используют 2-слойные платы (быстрый перегрев). Профессиональные — 4, 6 или 8-слойные платы с увеличенным содержанием меди.</li>
+            <li><strong>Пластиковое шасси (Bottom shell):</strong> Основа, на которую крепится плата. Определяет механическую жесткость и подверженность термическим деформациям при нагреве от диодов и солнца.</li>
+            <li><strong>Оптическая калибровка:</strong> Процесс замера свечения каждого отдельного пикселя на конвейере камерами и запись поправочных коэффициентов в память приемной карты модуля.</li>
+          </ul>
+        </div>
+
+        <div class=\"section-label\">Индустриальная сегментация (Vendor Tiers)</div>
+        <div class=\"grid-2\" style=\"margin-bottom:24px\">
           
-          <div class="card card-good">
-            <h4 style="font-size:15px; margin-bottom:8px;">🌟 Tier 1 (Мировые лидеры)</h4>
-            <p style="font-size:13px; color:var(--text2);">Бренды: <strong>Unilumin, Absen, Leyard</strong>.</p>
-            <ul style="margin-top:8px; padding-left:16px; font-size: 13px;">
-              <li><strong style="color:var(--text)">Что это:</strong> Топ-3 мирового рынка. Жесткий контроль качества, отборные комплектующие, собственные патенты.</li>
-              <li><strong style="color:var(--text)">Аргумент для продажи:</strong> Экран будет работать идеально из коробки, 100% совпадение цветов (без разнотона). Идеально для ТВ-студий, где важна идеальная камера.</li>
-              <li><strong style="color:var(--text)">Влияние на цену:</strong> Самые дорогие на рынке. Клиент платит премию за бренд и гарантированное отсутствие проблем.</li>
+          <div class=\"card card-good\">
+            <h4 style=\"font-size:15px; margin-bottom:8px;\">🌟 Tier-1 (Глобальные лидеры)</h4>
+            <p style=\"font-size:13px; color:var(--text2);\">Вендоры: <strong>Unilumin, Absen, Leyard</strong>.</p>
+            <ul style=\"margin-top:8px; padding-left:16px; font-size: 13px;\">
+              <li><strong>Инженерный профиль:</strong> Собственные R&D центры, жесткий входной контроль компонентов. Многослойные печатные платы (6-8 слоев), минимизирующие электромагнитные наводки (EMC/EMI).</li>
+              <li><strong>Эксплуатация:</strong> 100% модулей проходят Pixel-to-Pixel калибровку из коробки. Нулевой допуск по эффекту Mura (пятнистости).</li>
+              <li><strong>Применение:</strong> Mission Critical объекты (режим 24/7), телевизионные Broadcast-студии, сложная нестандартная геометрия. Максимальный показатель MTBF.</li>
             </ul>
           </div>
 
-          <div class="card card-accent">
-            <h4 style="font-size:15px; margin-bottom:8px;">✅ Tier 2 (Золотая середина)</h4>
-            <p style="font-size:13px; color:var(--text2);">Бренды: <strong>Liantronics, Ledman, INFiLED</strong>.</p>
-            <ul style="margin-top:8px; padding-left:16px; font-size: 13px;">
-              <li><strong style="color:var(--text)">Что это:</strong> Крупнейшие фабрики с отличным качеством и ровной пайкой, но без огромной наценки за имя.</li>
-              <li><strong style="color:var(--text)">Аргумент для продажи:</strong> «Вы получаете качество уровня мировых лидеров, но экономите 20-30% бюджета».</li>
-              <li><strong style="color:var(--text)">Влияние на цену:</strong> Базовый выбор для хороших корпоративных проектов, ТЦ и надежного уличного Outdoor.</li>
+          <div class=\"card card-accent\">
+            <h4 style=\"font-size:15px; margin-bottom:8px;\">✅ Tier-2 (Индустриальный стандарт)</h4>
+            <p style=\"font-size:13px; color:var(--text2);\">Вендоры: <strong>Liantronics, Ledman, INFiLED</strong>.</p>
+            <ul style=\"margin-top:8px; padding-left:16px; font-size: 13px;\">
+              <li><strong>Инженерный профиль:</strong> Стандартизированный высококачественный BOM. Использование 4-слойных PCB. Отличная точность SMT-монтажа, но менее глубокая заводская калибровка.</li>
+              <li><strong>Эксплуатация:</strong> Рабочая лошадка рынка. Требует базовой пусконаладки и настройки контроллеров на объекте. Стабильная геометрия шасси.</li>
+              <li><strong>Применение:</strong> Оптимальный TCO (Total Cost of Ownership) для коммерческого ритейла, корпоративного сектора и качественных Outdoor-фасадов.</li>
             </ul>
           </div>
 
-          <div class="card card-warn">
-            <h4 style="font-size:15px; margin-bottom:8px;">🛒 Масс-маркет (Народные бренды)</h4>
-            <p style="font-size:13px; color:var(--text2);">Бренды: <strong>Qiangli, Cailiang, Meiyad</strong>.</p>
-            <ul style="margin-top:8px; padding-left:16px; font-size: 13px;">
-              <li><strong style="color:var(--text)">Что это:</strong> Заводы-гиганты, штампующие модули миллионами штук. Используют бюджетные диоды и тонкий дешевый пластик.</li>
-              <li><strong style="color:var(--text)">Риск для клиента:</strong> Тонкий пластик деформируется на солнце — экран идет "волнами". Высокий риск разнотона (разные модули светят разным оттенком).</li>
-              <li><strong style="color:var(--text)">Влияние на цену:</strong> Экстремально дешево. С ними мы конкурируем в 80% гос-тендеров.</li>
+          <div class=\"card card-warn\">
+            <h4 style=\"font-size:15px; margin-bottom:8px;\">🛒 Масс-маркет (Volume Drivers)</h4>
+            <p style=\"font-size:13px; color:var(--text2);\">Вендоры: <strong>Qiangli, Cailiang, Meiyad</strong>.</p>
+            <ul style=\"margin-top:8px; padding-left:16px; font-size: 13px;\">
+              <li><strong>Инженерный профиль:</strong> Экстремальное удешевление BOM. Использование 2-слойных плат (накопление тепла). Шасси из вторичного переработанного пластика (Recycled ABS). Закупка диодов без строгих допусков по биннингу.</li>
+              <li><strong>Эксплуатация:</strong> Высокий риск термодеформации (экран «идет волнами» на жаре). Заметный разнотон между разными партиями. Уязвимость к вибрациям.</li>
+              <li><strong>Применение:</strong> Бюджетный Signage, госзакупки с приоритетом низшей цены, объекты с коротким жизненным циклом.</li>
             </ul>
           </div>
           
-          <div class="card">
-            <h4 style="font-size:15px; margin-bottom:8px;">🇺🇸 Локальные лидеры (Спец-решения)</h4>
-            <p style="font-size:13px; color:var(--text2);">Бренды: <strong>Daktronics (США), Barco (Бельгия)</strong>.</p>
-            <ul style="margin-top:8px; padding-left:16px; font-size: 13px;">
-              <li><strong style="color:var(--text)">Что это:</strong> Элитные западные бренды для узких рынков (Американские стадионы, кинотеатры).</li>
-              <li><strong style="color:var(--text)">Влияние на цену:</strong> Космическая цена из-за локализации и супер-сервиса. Почти не встречаются в наших коммерческих сметах, если это не райдерный проект.</li>
+          <div class=\"card\">
+            <h4 style=\"font-size:15px; margin-bottom:8px;\">🇺🇸 Tier-0 (Bespoke Engineering)</h4>
+            <p style=\"font-size:13px; color:var(--text2);\">Вендоры: <strong>Daktronics, Barco, SiliconCore</strong>.</p>
+            <ul style=\"margin-top:8px; padding-left:16px; font-size: 13px;\">
+              <li><strong>Инженерный профиль:</strong> Использование кастомных запатентованных драйверов архитектуры Common Cathode (общий катод). Собственная проприетарная система коммутации и процессинга сигнала (не NovaStar).</li>
+              <li><strong>Применение:</strong> Сверхкрупные стадионы, военные центры управления, райдерные кинотеатральные проекты. В масс-маркете и стандартном B2B не встречаются.</li>
             </ul>
           </div>
           
         </div>
 
-        <div class="info-box info-green">
-          <strong>Быстрые правила для продаж (Rules of Thumb):</strong>
-          <br>• Если конкурент предлагает клиенту <strong>Qiangli (Масс-маркет)</strong>, не пытайтесь продать ему <strong>Absen (Tier 1)</strong> — вы проиграете по цене в 3 раза.
-          <br>• Правильно обрабатывайте возражения по цене: «Дешевый пластик деформируется на солнце через 1 год, и ваш фасад пойдет волнами. Мы закладываем фабричный <strong>Tier 2</strong> (Liantronics) — это жесткий корпус и гарантия ровного экрана».
-          <br>• Если проект идет на <strong>телестудию или в зал Правительства</strong> — закладываем строго <strong>Tier 1</strong> (Unilumin, Absen). Там бюджет вторичен, главное — безупречная картинка на ТВ-камере.
+        <div class=\"info-box info-green\">
+          <strong>Инженерные правила (Rules of Thumb):</strong>
+          <br>• <strong>Термофизика пластика:</strong> Недопустимо закладывать матрицы уровня Масс-маркет на солнечную сторону зданий. Вторичный пластик корпуса имеет высокий коэффициент температурного расширения — при нагреве до +60°C модули физически выгибает, нарушая планарность полотна и ломая SMD-пайку.
+          <br>• <strong>Закон партионности (Batch mismatch):</strong> При проектировании на Tier-1 вендорах можно дозаказать модули через 2-3 года и программно откалибровать их под выцветший экран. Для Масс-маркета это невозможно — заводы используют спотовые закупки диодов с разной длиной волны, откалибровать их оптически не получится (аппаратное ограничение дешевых IC-драйверов).
+          <br>• <strong>Электромагнитная совместимость (EMC):</strong> Для аэропортов и объектов с чувствительным радиооборудованием проходят только экраны от Tier-1/Tier-2, имеющие 6-слойные PCB, которые экранируют паразитные наводки (EMI) от импульсных блоков питания.
         </div>
     
   `

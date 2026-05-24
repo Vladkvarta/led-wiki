@@ -270,38 +270,3 @@
           margin-top: 2px;
         }
 
-        /* Print Styles */
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-
-          #printable-offer,
-          #printable-offer * {
-            visibility: visible;
-          }
-
-          #printable-offer {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            border: none;
-            box-shadow: none;
-            padding: 0;
-          }
-
-          .no-print {
-            display: none !important;
-          }
-
-          .wizard-receipt {
-            margin-top: 0;
-          }
-
-          .tech-card {
-            break-inside: avoid;
-            border-color: #cbd5e1;
-          }
-        }
-

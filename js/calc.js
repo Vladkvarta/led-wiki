@@ -90,11 +90,7 @@
           const rcard = DB.receivingCards.find(r => r.id === rcardId);
           if (!mod || !ctrl || !psu || !rcard) return;
 
-          // Render Hints
-          document.getElementById('w_mod_hints').innerHTML = `<b>${t('h_bright')}</b> ${mod.brightness} nits | <b>${t('h_prot')}</b> ${mod.ip} | <b>${t('h_tech')}</b> ${mod.technology}`;
-          document.getElementById('w_ctrl_hints').innerHTML = `<b>${t('h_type')}</b> ${ctrl.type} | <b>${t('h_ports')}</b> ${ctrl.ethernetPorts} | <b>${t('h_cloud')}</b> ${ctrl.cloud ? t('h_yes') : t('h_no')}`;
-          // document.getElementById('w_psu_hints').innerHTML = `...`; (moved below)
-          document.getElementById('w_rcard_hints').innerHTML = `<b>${t('h_desc')}</b> ${dbT(rcard, 'notes')}`;
+          // Hints will be rendered after calculations
 
           // Inputs
           const w_mm = parseFloat(document.getElementById('w_width').value) || 0;
@@ -119,6 +115,17 @@
           const resW = cols * modResW;
           const resH = rows * modResH;
           const totalPx = resW * resH * sidesMultiplier;
+
+          // Render Hints
+          document.getElementById('w_mod_hints').innerHTML = `<b>${t('h_bright')}</b> ${mod.brightness} nits | <b>${t('h_prot')}</b> ${mod.ip} | <b>${t('h_tech')}</b> ${mod.technology}`;
+          
+          let ctrlHint = `<b>${t('h_type')}</b> ${ctrl.type} | <b>${t('h_ports')}</b> ${ctrl.ethernetPorts} | <b>${t('h_cloud')}</b> ${ctrl.cloud ? t('h_yes') : t('h_no')}`;
+          if (ctrl.maxPixels && totalPx > ctrl.maxPixels) {
+              ctrlHint += `<br><span style="color:#ef4444; font-weight:600; font-size:12px; display:inline-block; margin-top:4px;">${t('ctrl_warn')} ${(ctrl.maxPixels).toLocaleString('ru')} px</span>`;
+          }
+          document.getElementById('w_ctrl_hints').innerHTML = ctrlHint;
+          
+          document.getElementById('w_rcard_hints').innerHTML = `<b>${t('h_desc')}</b> ${dbT(rcard, 'notes')}`;
 
           // Power
           const maxPwrW = totalMods * mod.maxPowerPerModule;
@@ -236,21 +243,26 @@
           elMatrixSub.style.color = '#64748b';
           elMatrixSub.style.fontWeight = '500';
 
+          const elMatrixPx = document.getElementById('r_matrix_px');
+          if (elMatrixPx) {
+            elMatrixPx.textContent = `${resW.toLocaleString('ru')} × ${resH.toLocaleString('ru')} px`;
+          }
+
           // Render Visual Grid
           const visualEl = document.getElementById('cabinet_visual');
           if (wDist.length > 0 && hDist.length > 0) {
-            let visualHtml = `<div style="display:flex; flex-direction:column; gap:4px; margin-top:16px; padding: 12px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">`;
-            visualHtml += `<div style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">${t('draw_title')}</div>`;
+            let visualHtml = `<div class="cab-visual-wrap" style="display:flex; flex-direction:column; gap:4px; margin-top:16px; padding: 12px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">`;
+            visualHtml += `<div class="cab-visual-title" style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">${t('draw_title')}</div>`;
 
             const pxPerRow = Math.min(30, 200 / rows); 
             hDist.forEach((hCab) => {
-                visualHtml += `<div style="display:flex; gap:4px;">`;
+                visualHtml += `<div class="cab-visual-row" style="display:flex; gap:4px;">`;
                 wDist.forEach((wCab) => {
                     const modsInCab = wCab * hCab;
                     const cabPsuCount = Math.ceil(modsInCab / maxModsPerPsu);
-                    visualHtml += `<div style="flex: ${wCab}; height: ${Math.max(32, hCab * pxPerRow)}px; background:#e0e7ff; border:1px solid #6366f1; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; color:#4338ca; font-weight:700; box-shadow:inset 0 1px 2px rgba(255,255,255,0.5); line-height:1.2;">
+                    visualHtml += `<div class="cab-visual-box" style="flex: ${wCab}; height: ${Math.max(32, hCab * pxPerRow)}px; background:#e0e7ff; border:1px solid #6366f1; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; color:#4338ca; font-weight:700; box-shadow:inset 0 1px 2px rgba(255,255,255,0.5); line-height:1.2;">
                       <div>${wCab}×${hCab}</div>
-                      <div style="font-size:10px; font-weight:500; color:#4f46e5; margin-top:2px;">${t('psu_pcs').replace('{count}', cabPsuCount)}</div>
+                      <div class="cab-visual-psu" style="font-size:10px; font-weight:500; color:#4f46e5; margin-top:2px;">${t('psu_pcs').replace('{count}', cabPsuCount)}</div>
                     </div>`;
                 });
                 visualHtml += `</div>`;

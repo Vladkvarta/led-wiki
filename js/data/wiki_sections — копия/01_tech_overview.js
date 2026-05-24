@@ -30,7 +30,7 @@ export const section = {
           </div>
         </div>
 
-        <div class="section-label">2 главных параметра для общения с клиентом</div>
+        <div class="section-label">Базовые параметры (Шаг и Яркость)</div>
         <div class="grid-2" style="margin-bottom:24px">
           <div class="card">
             <h4>📏 Шаг пикселя (Буква P)</h4>
@@ -54,6 +54,24 @@ export const section = {
               </ul>
             </div>
           </div>
+        </div>
+
+        <div class="section-label">Визуальные параметры (Deep Dive: За что клиент платит больше)</div>
+        <div class="card" style="margin-bottom:24px">
+          <ul style="margin-top:12px; font-size: 14px; padding-left:16px; display:flex; flex-direction:column; gap:16px;">
+            <li>
+              <strong>Refresh Rate (Частота обновления / ШИМ)</strong> + <em>Количество обновлений диода в секунду (Гц)</em> = <strong>Защита от черных полос на фото/видео.</strong>
+              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> База — 1920 Гц. Если экран ставят на сцену или в ТЦ, все видео в Instagram клиентов будут с черными мерцающими полосами. Продаем премиум IC-драйверы (3840 Гц или 7680 Гц) со словами: <em>«Экономия на частоте убьет весь ваш маркетинг в соцсетях, видео будут бракованными»</em>.</span>
+            </li>
+            <li>
+              <strong>Grayscale (Градации серого / Битность)</strong> + <em>Количество оттенков цвета (14-bit, 16-bit)</em> = <strong>Идеальные детали в тенях.</strong>
+              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> Дешевые экраны на сниженной яркости (вечером) теряют оттенки. Лица людей становятся пятнистыми, небо распадается на полосы (бандинг). <em>«Наш экран даже на 10% яркости сохранит сочность и плавные переходы, а не превратится в 8-битную игру»</em>.</span>
+            </li>
+            <li>
+              <strong>High Contrast Mask (Маска модуля)</strong> + <em>Пластиковая решетка вокруг диодов</em> = <strong>Глубокий черный цвет днем.</strong>
+              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> Голая плата отражает солнце. Качественная маска поглощает свет. <em>«Конкурент сэкономит на пластике маски, и днем его экран будет серым даже при 7000 нит. Наш экран останется контрастным»</em>.</span>
+            </li>
+          </ul>
         </div>
     
   `

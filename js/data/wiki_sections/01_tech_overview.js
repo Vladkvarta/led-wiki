@@ -1,75 +1,88 @@
 export const section = {
   id: "tech-overview",
   icon: "🌍",
-  title: "Обзор технологии",
+  title: "Обзор технологии и архитектуры",
   content: `
 
-        <div class="section-label">Как объяснить клиенту, что такое LED-экран?</div>
+        <div class="section-label">Архитектура: Как устроен LED-экран</div>
         <div class="card" style="margin-bottom: 20px;">
-          <p><strong>LED-экран</strong> — это дисплей, который собирается из отдельных светодиодных блоков (модулей). В отличие от телевизоров, он не имеет ограничений по размеру и у него нет рамок между блоками.</p>
+          <p><strong>LED-экран</strong> — это модульный дисплей, не имеющий ограничений по разрешению и физическому размеру. Строится по принципу конструктора.</p>
           <ul style="margin-top:12px; font-size: 14px; padding-left:16px;">
-            <li><strong style="color:var(--good)">Плюс для клиента:</strong> Можно собрать экран любой формы (даже изогнутый) и размера (хоть на весь фасад здания).</li>
-            <li><strong style="color:var(--good)">Плюс для клиента:</strong> Идеальная ремонтопригодность. Если часть экрана ломается, меняется один маленький блок, а не весь экран.</li>
-            <li><strong style="color:var(--good)">Плюс для клиента:</strong> Идеально видно на ярком солнце (обычные телевизоры так не могут).</li>
+            <li><strong>Бесшовность (Seamless):</strong> В отличие от видеостен на базе LCD-панелей, LED-экран не имеет рамок. Картинка абсолютно монолитна.</li>
+            <li><strong>SMD vs COB (Тип диодов):</strong> 
+              <br><span style="color:var(--text2); font-size: 13px;"><em>SMD (Surface-Mount Device)</em> — классика, диоды припаяны на плату. <em>COB (Chip-on-Board)</em> — чипы залиты единым слоем компаунда. <strong>Выгода:</strong> COB дает абсолютную антивандальность, защиту от влаги и идеальный глубокий черный цвет. Продаем в VIP-переговорные и зоны высокой проходимости.</span>
+            </li>
+            <li><strong>Обслуживание (Front / Rear Maintenance):</strong> 
+              <br><span style="color:var(--text2); font-size: 13px;"><em>Front (Фронтальное)</em> — модули снимаются спереди магнитной присоской. <em>Rear (Тыловое)</em> — нужен доступ за экраном. <strong>Выгода:</strong> Фронтальное обслуживание экономит полезную площадь помещения, экран можно вешать вплотную к стене.</span>
+            </li>
           </ul>
         </div>
 
-        <div class="section-label">Из чего состоит экран (что мы продаем в смете)</div>
-        <div class="grid-3" style="margin-bottom:24px">
+        <div class="section-label">Аппаратная часть (Что мы закладываем в смету)</div>
+        <div class="grid-2" style="margin-bottom:24px">
           <div class="card card-accent">
             <h4 style="font-size:15px; margin-bottom:8px;">1. LED-модуль</h4>
-            <p style="font-size:13px; color:var(--text2);">Самая маленькая деталь (размером с небольшую плитку). На лицевой стороне напаяны светодиоды, на обратной — микросхемы.</p>
+            <p style="font-size:13px; color:var(--text2);">Базовый кирпичик экрана. Содержит диоды, маску и микросхемы драйверов (IC). При выходе из строя диода меняется за 2 минуты без демонтажа экрана.</p>
           </div>
           <div class="card card-accent">
-            <h4 style="font-size:15px; margin-bottom:8px;">2. Кабинет</h4>
-            <p style="font-size:13px; color:var(--text2);">Металлический ящик, в который прикручиваются модули. Внутри него прячутся блоки питания и «мозги» (приемная карта).</p>
+            <h4 style="font-size:15px; margin-bottom:8px;">2. Кабинет (Cabinet)</h4>
+            <p style="font-size:13px; color:var(--text2);">Структурный блок, объединяющий модули. <br><strong>Die-cast Aluminum (Литой алюминий)</strong> — премиум. Легкий, идеальная геометрия (без щелей). <br><strong>Iron (Железо)</strong> — дешево, тяжело, возможны зазоры.</p>
           </div>
           <div class="card card-accent">
-            <h4 style="font-size:15px; margin-bottom:8px;">3. Контроллер</h4>
-            <p style="font-size:13px; color:var(--text2);">Главный пульт управления. Подключается к компьютеру клиента (по HDMI/DVI) и передает видео на кабинеты.</p>
+            <h4 style="font-size:15px; margin-bottom:8px;">3. Блок питания (PSU)</h4>
+            <p style="font-size:13px; color:var(--text2);">Конвертирует 220V в 5V для диодов. <strong>Аргумент надежности:</strong> Надежные БП (типа MeanWell) защищают экран от выгорания при скачках напряжения и снижают энергопотребление на 20%.</p>
+          </div>
+          <div class="card card-accent">
+            <h4 style="font-size:15px; margin-bottom:8px;">4. Система управления (NovaStar/Colorlight)</h4>
+            <p style="font-size:13px; color:var(--text2);"><strong>Sending Card (Контроллер):</strong> Стоит у клиента, захватывает HDMI и шлет по витой паре. <br><strong>Receiving Card:</strong> Стоит в каждом кабинете, расшифровывает сигнал для модулей.</p>
           </div>
         </div>
 
-        <div class="section-label">Базовые параметры (Шаг и Яркость)</div>
+        <div class="section-label">Базовые параметры (Подбор под задачу)</div>
         <div class="grid-2" style="margin-bottom:24px">
           <div class="card">
-            <h4>📏 Шаг пикселя (Буква P)</h4>
-            <p style="font-size:14px; margin-top:6px;">Расстояние между диодами в миллиметрах (Например: <strong>P2.5 = 2.5 мм</strong>).</p>
+            <h4>📏 Шаг пикселя (Pixel Pitch / P)</h4>
+            <p style="font-size:14px; margin-top:6px;">Расстояние между центрами соседних пикселей в миллиметрах (Например: P2.5).</p>
             <div style="margin-top:12px; font-size: 13px;">
-              <p><strong>Как использовать в продажах:</strong></p>
+              <p><strong>Rule of Thumb (Быстрый расчет):</strong></p>
               <ul style="margin-top:4px; padding-left:16px; color:var(--text2);">
-                <li>Чем <strong>меньше</strong> цифра, тем <strong>дороже</strong> экран и лучше картинка вблизи.</li>
-                <li><strong style="color:var(--text)">Быстрый расчет:</strong> Шаг пикселя = минимальное расстояние просмотра в метрах. <em>(Т.е. экран P3 клиенту будет комфортно смотреть минимум с 3 метров).</em></li>
+                <li><strong>1 мм шага = 1 метр минимального расстояния просмотра.</strong> (Экран P2 комфортно смотреть с 2 метров).</li>
+                <li>Чем меньше "P", тем выше разрешение (и плотность пикселей на кв.м), но геометрически растет цена (больше диодов и пайки).</li>
               </ul>
             </div>
           </div>
           <div class="card">
-            <h4>☀️ Яркость (Нит)</h4>
-            <p style="font-size:14px; margin-top:6px;">Насколько экран способен перебить внешнее освещение.</p>
+            <h4>☀️ Яркость (Nits / cd/m²)</h4>
+            <p style="font-size:14px; margin-top:6px;">Интенсивность светового потока. Определяет способность экрана "перекричать" внешнее освещение.</p>
             <div style="margin-top:12px; font-size: 13px;">
-              <p><strong>Как выбрать для клиента:</strong></p>
+              <p><strong>Золотые стандарты:</strong></p>
               <ul style="margin-top:4px; padding-left:16px; color:var(--text2);">
-                <li><strong>В помещение (Indoor):</strong> 600–1500 нит. Больше нельзя — будет слепить людей.</li>
-                <li><strong>На улицу (Outdoor):</strong> 5000–10000 нит. Если продать меньше — днем экран будет казаться выключенным.</li>
+                <li><strong>Indoor (Внутри):</strong> 600–1000 Nits.</li>
+                <li><strong>Window (Витрина):</strong> 2500–4000 Nits (иначе солнце засветит экран сквозь стекло).</li>
+                <li><strong>Outdoor (Улица):</strong> 5500–10000 Nits. </li>
               </ul>
             </div>
           </div>
         </div>
 
-        <div class="section-label">Визуальные параметры (Deep Dive: За что клиент платит больше)</div>
+        <div class="section-label">Визуальные и Инженерные параметры (Deep Dive: Аргументы для Upsell)</div>
         <div class="card" style="margin-bottom:24px">
           <ul style="margin-top:12px; font-size: 14px; padding-left:16px; display:flex; flex-direction:column; gap:16px;">
             <li>
-              <strong>Refresh Rate (Частота обновления / ШИМ)</strong> + <em>Количество обновлений диода в секунду (Гц)</em> = <strong>Защита от черных полос на фото/видео.</strong>
-              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> База — 1920 Гц. Если экран ставят на сцену или в ТЦ, все видео в Instagram клиентов будут с черными мерцающими полосами. Продаем премиум IC-драйверы (3840 Гц или 7680 Гц) со словами: <em>«Экономия на частоте убьет весь ваш маркетинг в соцсетях, видео будут бракованными»</em>.</span>
+              <strong>Refresh Rate (Частота обновления / ШИМ)</strong> + <em>Скорость мерцания диодов (Гц)</em> = <strong>Экран без полос на камеру.</strong>
+              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> База — 1920 Гц. Если экран ставят на сцену, в студию или ТЦ, где люди снимают сторис, дешевый экран даст черные бегущие полосы (Scan lines). Продаем 3840 Гц или 7680 Гц: <em>«Сэкономив на IC-драйверах, вы получите бракованный контент во всех соцсетях клиентов»</em>.</span>
             </li>
             <li>
-              <strong>Grayscale (Градации серого / Битность)</strong> + <em>Количество оттенков цвета (14-bit, 16-bit)</em> = <strong>Идеальные детали в тенях.</strong>
-              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> Дешевые экраны на сниженной яркости (вечером) теряют оттенки. Лица людей становятся пятнистыми, небо распадается на полосы (бандинг). <em>«Наш экран даже на 10% яркости сохранит сочность и плавные переходы, а не превратится в 8-битную игру»</em>.</span>
+              <strong>Grayscale (Битность / Градации серого)</strong> + <em>14-bit vs 16-bit глубина цвета</em> = <strong>Качество картинки на низкой яркости.</strong>
+              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> Если убавить яркость дешевого экрана вечером до 10-20%, он теряет оттенки. Градиенты распадаются на жесткие полосы (Banding), лица выглядят пятнистыми. <em>«16-битный контроллер и дорогие чипы сохранят киношную плавность цвета даже ночью»</em>.</span>
             </li>
             <li>
-              <strong>High Contrast Mask (Маска модуля)</strong> + <em>Пластиковая решетка вокруг диодов</em> = <strong>Глубокий черный цвет днем.</strong>
-              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> Голая плата отражает солнце. Качественная маска поглощает свет. <em>«Конкурент сэкономит на пластике маски, и днем его экран будет серым даже при 7000 нит. Наш экран останется контрастным»</em>.</span>
+              <strong>Scan Rate (Частота сканирования)</strong> + <em>Сколько строк диодов обслуживает один чип (1/16, 1/32)</em> = <strong>Реальная яркость и долговечность.</strong>
+              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> Чем меньше знаменатель (например 1/16 лучше, чем 1/32), тем больше времени на диод подается ток. <em>«У конкурентов диоды работают на износ (чтобы выдать ту же яркость при плохом Scan Rate), они выгорят за 2 года. Наша архитектура бережет ресурс чипов (срок службы 100 000 часов)»</em>.</span>
+            </li>
+            <li>
+              <strong>IP Rating (Степень защиты)</strong> + <em>IP65, IP68 (Герметизация)</em> = <strong>Выживаемость на улице.</strong>
+              <br><span style="color:var(--text2); font-size: 13px;"><strong>Аргумент цены:</strong> <em>«Indoor экраны (IP20) сгорят от конденсата при первом перепаде температур. Наш Outdoor (IP65/IP65) залит силиконовым компаундом с обеих сторон плат, а разъемы (Neutrik / Aviation plugs) герметичны. Ему не страшна автомойка высокого давления»</em>.</span>
             </li>
           </ul>
         </div>

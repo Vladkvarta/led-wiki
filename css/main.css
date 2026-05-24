@@ -100,7 +100,35 @@ select option{background:var(--card)}
 .wip-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:10px}
 .wip-desc{color:var(--text2);font-size:14px;max-width:480px;margin:0 auto}
 
-@media print{.header,.nav-bar,.print-btn,.calc-btn{display:none!important}.main{margin-top:0!important;padding:0!important}.section{display:block!important;page-break-after:always}body{background:#fff;color:#000}.card{box-shadow:none}}
+@media print {
+  .header, .nav-bar, .print-btn, .calc-btn, .admin-btn, .wizard-step, .page-title { display: none !important; }
+  .main { margin-top: 0 !important; padding: 0 !important; }
+  .section:not(.active) { display: none !important; }
+  .section.active { display: block !important; page-break-after: auto; }
+  body { background: #fff; color: #000; font-size: 12px; }
+  .card, .wizard-receipt { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; }
+  .receipt-header { margin-bottom: 8px !important; font-size: 16px !important; padding-top: 0 !important; }
+  .receipt-table { font-size: 11px; }
+  .receipt-table th, .receipt-table td { padding: 4px; border-bottom: 1px solid #ccc; }
+  .receipt-table tfoot { display: table-row-group; }
+  .receipt-total td { padding-top: 8px; font-size: 14px; white-space: nowrap; }
+  #receipt_total { font-size: 16px; white-space: nowrap; }
+  .tech-grid { display: flex !important; flex-wrap: nowrap !important; gap: 8px !important; margin-bottom: 12px !important; }
+  .tech-card { flex: 1 !important; padding: 6px !important; border: 1px solid #e2e8f0; margin: 0 !important; flex-direction: column !important; align-items: center !important; text-align: center !important; }
+  .tech-card .tc-icon { display: none !important; }
+  .tech-card .tc-body { display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
+  .tech-card .tc-label { font-size: 10px !important; margin-bottom: 2px !important; }
+  .tech-card .tc-val { font-size: 13px !important; }
+  .tech-card .tc-sub { font-size: 10px !important; margin-top: 2px !important; line-height: 1.1; }
+  .section-title { margin-bottom: 8px !important; margin-top: 8px !important; font-size: 13px !important; }
+  #cabinet_visual { page-break-inside: avoid; margin-top: 4px !important; }
+  .cab-visual-wrap { padding: 4px !important; margin-top: 4px !important; gap: 2px !important; border: none !important; background: transparent !important; }
+  .cab-visual-title { font-size: 10px !important; margin-bottom: 2px !important; }
+  .cab-visual-row { gap: 2px !important; }
+  .cab-visual-box { height: auto !important; min-height: 20px !important; padding: 2px !important; font-size: 9px !important; border-width: 0.5px !important; }
+  .cab-visual-psu { font-size: 7px !important; margin-top: 1px !important; }
+  .tech-bar { margin-bottom: 8px !important; }
+}
 
 /* Calc Wizard Styles */
 .calc-wizard {
